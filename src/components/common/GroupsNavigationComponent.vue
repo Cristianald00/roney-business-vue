@@ -10,7 +10,7 @@
 			}"
 			@click="toggleGroupSelection(group)"
 		>
-			{{ group.title }}
+			{{ group.name }}
 		</button>
 		<button
 			type="button"

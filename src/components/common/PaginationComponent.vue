@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="paginationType" :class="tableType">
-			<span class="items-per-page-label" v-if="canModifyPage">TITLE_PER_PAGE</span>
+			<span class="items-per-page-label" v-if="canModifyPage">Per page</span>
 			<DropdownAutoloadComponent
 				v-if="canModifyPage"
 				customClass="tiny-narrow"
@@ -10,20 +10,21 @@
 				placeholder="-"
 				v-model="currentPerPage"
 			/>
-			<span class="items-on-page-label">
-				{{ pagination.from }} - {{ pagination.to }}
-				DETAILS_OF {{ pagination.total }}
-			</span>
 			<IconButtonComponent
 				@onAction="onClickPreviousPage()"
 				:disabled="isInFirstPage"
 				icon="fa-solid fa-angle-left"
+				customClass=""
 			/>
-
+			<span class="items-on-page-label">
+				{{ pagination.from }} - {{ pagination.to }}
+				of {{ pagination.total }}
+			</span>
 			<IconButtonComponent
 				@onAction="onClickNextPage()"
 				:disabled="isInLastPage"
 				icon="fa-solid fa-angle-right"
+				customClass=""
 			/>
 		</div>
 	</div>
@@ -121,6 +122,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.paginationType {
+	padding-top: 10px;
+}
 .items-per-page-label {
 	font-weight: 500;
 	font-size: 15px/26px;
@@ -133,5 +137,8 @@ export default {
 }
 .paginationType.small {
 	float: right;
+}
+.icon-button-component {
+	display: inline-block;
 }
 </style>

@@ -2,7 +2,7 @@
     <div class="module-view-container">
         <!-- SECTION: Header -->
         <GroupsNavigationComponent
-            :groups="groups"
+            :groups="outlines"
             @onClicked="onNavGroupClicked"
         />
 
@@ -20,37 +20,26 @@
     			/>
             </div>
 
+            <!-- SECTION: List Options -->
+            <div class="module-list-options">
+                <IconButtonComponent
+                    v-if="!isDisplayCreateForm"
+    				icon="fa-solid fa-plus"
+                    title="New Expense"
+                    :selected="false"
+    				customClass=""
+                    @onAction="isDisplayCreateForm = true"
+    			/>
+            </div>
+
             <!-- SECTION: Create item -->
-            <div class="module-group-create-form">
+            <div v-if="isDisplayCreateForm" class="module-group-create-form">
                 <InputComponent
 					id="item-name-input"
 					name="item-name-input"
 					placeholder="Expense Name"
                     customClass="medium"
 					v-model="newItem.name"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <InputComponent
-					id="item-desc-input"
-					name="item-desc-input"
-					placeholder="Description"
-                    customClass="default"
-					v-model="newItem.description"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <DropdownAutoloadComponent
-    				:options="['Cristian', 'dsds']"
-    				:disabled="false"
-    				placeholder="Select User"
-    				v-model="newItem.user"
-    			/>
-                <span class="form-vertical-spacer"></span>
-                <InputComponent
-					id="item-total-input"
-					name="item-total-input"
-					placeholder="Total"
-                    customClass="medium"
-					v-model="newItem.total"
 				/>
                 <span class="form-horiz-spacer"></span>
                 <InputComponent
@@ -61,6 +50,29 @@
 					v-model="newItem.date"
 				/>
                 <span class="form-horiz-spacer"></span>
+                <DropdownAutoloadComponent
+    				:options="users"
+    				:disabled="false"
+    				placeholder="Select User"
+    				v-model="newItem.user"
+    			/>
+                <span class="form-vertical-spacer"></span>
+                <InputComponent
+					id="item-total-input"
+					name="item-total-input"
+					placeholder="Total (0.00)"
+                    customClass="medium"
+					v-model="newItem.total"
+				/>
+                <span class="form-horiz-spacer"></span>
+                <InputComponent
+					id="item-desc-input"
+					name="item-desc-input"
+					placeholder="Description"
+                    customClass="default"
+					v-model="newItem.description"
+				/>
+                <span class="form-vertical-spacer"></span>
                 <SubmitButtonComponent
                     :title="'CREATE'"
                     customClass="default"
@@ -70,7 +82,7 @@
                 <SubmitButtonComponent
                     :title="'CLOSE'"
                     customClass="default gray-submit"
-                    @onAction="goManageGroup"
+                    @onAction="isDisplayCreateForm = false"
                 />
             </div>
 
@@ -98,7 +110,7 @@
 
 				<template v-slot:body>
 					<tr
-						v-for="item in items"
+						v-for="item in outlines"
 						:key="item.id"
 						@click="handleRowClick(item.id)"
 					>
@@ -138,6 +150,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { useExpenseStore } from '../stores/expense'
+import { useOutlineStore } from '../stores/outline'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleExpensesMixin from '@/mixins/module-expenses-mixin'
 
@@ -150,128 +163,171 @@ export default defineComponent({
         return {
             // Define data properties
             name: '',
-            groups: [
-                {
-                    id: 1,
-                    title: 'Gastos Totales',
-                    isSelected: true
-                },
-                {
-                    id: 2,
-                    title: 'Ingresado por ususarios',
-                    isSelected: false
-                },
-                {
-                    id: 3,
-                    title: 'Construcción',
-                    isSelected: false
-                },
-                {
-                    id: 4,
-                    title: 'Empleados',
-                    isSelected: false
-                }
+            isDisplayCreateForm: false,
+            items: [],
+            itemsArray: [
+                [
+                    {
+                        id: 1,
+                        name: 'Expense 1',
+                        description: 'Expense 1 description',
+                        user: 'Cristian',
+                        total: 3000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 2,
+                        name: 'Expense 2',
+                        description: 'Expense 2 description',
+                        user: 'Silvi',
+                        total: 10000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 3,
+                        name: 'Expense 3',
+                        description: 'Expense 3 description',
+                        user: 'Cristian',
+                        total: 250000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 4,
+                        name: 'Expense 1',
+                        description: 'Expense 1 description',
+                        user: 'Cristian',
+                        total: 3000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 5,
+                        name: 'Expense 2',
+                        description: 'Expense 2 description',
+                        user: 'Silvi',
+                        total: 10000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 6,
+                        name: 'Expense 3',
+                        description: 'Expense 3 description',
+                        user: 'Cristian',
+                        total: 250000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 7,
+                        name: 'Expense 1',
+                        description: 'Expense 1 description',
+                        user: 'Cristian',
+                        total: 3000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 8,
+                        name: 'Expense 2',
+                        description: 'Expense 2 description',
+                        user: 'Silvi',
+                        total: 10000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 9,
+                        name: 'Expense 3',
+                        description: 'Expense 3 description',
+                        user: 'Cristian',
+                        total: 250000.00,
+                        date: 'May 1 2023'
+                    }
+                ],
+                [
+                    {
+                        id: 1,
+                        name: 'Expense 1',
+                        description: 'Expense 1 description',
+                        user: 'Cristian',
+                        total: 3000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 2,
+                        name: 'Expense 2',
+                        description: 'Expense 2 description',
+                        user: 'Silvi',
+                        total: 10000000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 3,
+                        name: 'Expense 3',
+                        description: 'Expense 3 description',
+                        user: 'Cristian',
+                        total: 250000.00,
+                        date: 'May 1 2023'
+                    },
+                    {
+                        id: 4,
+                        name: 'Expense 1',
+                        description: 'Expense 1 description',
+                        user: 'Cristian',
+                        total: 3000000.00,
+                        date: 'May 1 2023'
+                    }
+                ]
             ],
-            items: [
+            users: [
                 {
                     id: 1,
-                    name: 'Expense 1',
-                    description: 'Expense 1 description',
-                    user: 'Cristian',
-                    total: 3000000.00,
-                    date: 'May 1 2023'
+                    name: 'Cristian'
                 },
                 {
                     id: 2,
-                    name: 'Expense 2',
-                    description: 'Expense 2 description',
-                    user: 'Silvi',
-                    total: 10000000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 3,
-                    name: 'Expense 3',
-                    description: 'Expense 3 description',
-                    user: 'Cristian',
-                    total: 250000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 4,
-                    name: 'Expense 1',
-                    description: 'Expense 1 description',
-                    user: 'Cristian',
-                    total: 3000000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 5,
-                    name: 'Expense 2',
-                    description: 'Expense 2 description',
-                    user: 'Silvi',
-                    total: 10000000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 6,
-                    name: 'Expense 3',
-                    description: 'Expense 3 description',
-                    user: 'Cristian',
-                    total: 250000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 7,
-                    name: 'Expense 1',
-                    description: 'Expense 1 description',
-                    user: 'Cristian',
-                    total: 3000000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 8,
-                    name: 'Expense 2',
-                    description: 'Expense 2 description',
-                    user: 'Silvi',
-                    total: 10000000.00,
-                    date: 'May 1 2023'
-                },
-                {
-                    id: 9,
-                    name: 'Expense 3',
-                    description: 'Expense 3 description',
-                    user: 'Cristian',
-                    total: 250000.00,
-                    date: 'May 1 2023'
+                    name: 'Other'
                 }
             ]
         }
+    },
+    computed: {
+        outlines() {
+			return useOutlineStore().outlines
+		},
     },
     watch: {},
     methods: {
         goManageGroup() {
             console.log('Manage group')
         },
-        loadItems() {
-            // Method for handling the register action
-            const expenseStore = useExpenseStore()
+        loadItems(outlineId = null) {
+            if (outlineId) {
+                this.items = this.itemsArray[outlineId]
+            } else {
+                this.items = this.itemsArray[0]
+            }
+            // const expenseStore = useExpenseStore()
 
-            console.log('1111')
-            expenseStore.list()
-            .then(() => {
-                // Perform any actions after successful register
-
-            })
-            .catch((error) => {
-                // Handle register error
-                console.error('Register error:', error)
-            })
+            // expenseStore.list()
+            // .then(() => {
+            //     // Perform any actions after successful register
+            //
+            // })
+            // .catch((error) => {
+            //     // Handle register error
+            //     console.error('Register error:', error)
+            // })
+        },
+        loadOutlines() {
+            const outlineStore = useOutlineStore()
+            outlineStore.list()
         },
         onNavGroupClicked(group) {
-            this.groups.forEach( (item) => {
+            this.outlines.forEach( (item) => {
                 // Set isSelected to false for all other items
-                item.isSelected = item !== group ? false : true
+                if ( item !== group ) {
+                    item.isSelected = false
+                } else {
+                    item.isSelected = true
+                    this.loadItems(group.id)
+                }
             })
         }
     },
@@ -281,6 +337,7 @@ export default defineComponent({
     },
     mounted() {
         this.loadItems()
+        this.loadOutlines()
     },
 })
 </script>
@@ -293,12 +350,15 @@ export default defineComponent({
         width: 70%;
         vertical-align: top;
 
-        .module-group-options {
-            *:nth-child(1) {
+        .module-group-options, .module-list-options {
+            .icon-button-component {
                 padding: 1em;
             }
             text-align: right;
-            margin-bottom: 5em;
+        }
+
+        .module-group-options {
+            margin-top: 1em;
         }
 
         .module-group-create-form {

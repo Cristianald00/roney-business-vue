@@ -375,6 +375,7 @@ export default {
 	display: inline-block;
 	max-width: 100%;
 	margin: auto;
+	background: white;
 
 	.dropdown-input {
 		position: relative;
