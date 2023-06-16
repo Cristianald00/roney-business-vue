@@ -6,7 +6,8 @@
         <nav class="header-body">
             <div class="header-nav">
                 <router-link class="header-nav-item" to="/"><font-awesome-icon icon="fa-solid fa-gauge" /><span>HOME</span></router-link>
-                <router-link class="header-nav-item" to="/about"><font-awesome-icon icon="fa-solid fa-receipt" /><span>EXPENSES</span></router-link>
+                <router-link class="header-nav-item" to="/expenses"><font-awesome-icon icon="fa-solid fa-receipt" /><span>EXPENSES</span></router-link>
+                <router-link class="header-nav-item" to="/outlines"><font-awesome-icon icon="fa-solid fa-sitemap" /><span>OUTLINES</span></router-link>
                 <router-link class="header-nav-item" to="/about"><font-awesome-icon icon="fa-solid fa-gauge" /><span>ABOUT</span></router-link>
                 <a class="header-nav-item" @click="goLogout"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span>LOG OUT</span></a>
             </div>

@@ -4,6 +4,7 @@
         <GroupsNavigationComponent
             :groups="outlines"
             @onClicked="onNavGroupClicked"
+            @onClickedAddNew="goCreateNewGroup"
         />
 
         <!-- SECTION: Center -->
@@ -39,22 +40,25 @@
 					name="item-name-input"
 					placeholder="Expense Name"
                     customClass="medium"
-					v-model="newItem.name"
+                    :value="newItem.name"
+                    @input="newItem.name = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
-                <InputComponent
+                <DatePickerComponent
 					id="item-date-input"
 					name="item-date-input"
 					placeholder="Date"
-                    customClass="medium"
-					v-model="newItem.date"
+                    :value="newItem.date"
+                    custom-class="medium"
+                    @input="newItem.date = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
                 <DropdownAutoloadComponent
     				:options="users"
     				:disabled="false"
     				placeholder="Select User"
-    				v-model="newItem.user"
+                    :value="newItem.user"
+                    @onValueChanged="newItem.user = $event"
     			/>
                 <span class="form-vertical-spacer"></span>
                 <InputComponent
@@ -62,7 +66,8 @@
 					name="item-total-input"
 					placeholder="Total (0.00)"
                     customClass="medium"
-					v-model="newItem.total"
+                    :value="newItem.total"
+                    @input="newItem.total = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
                 <InputComponent
@@ -70,13 +75,14 @@
 					name="item-desc-input"
 					placeholder="Description"
                     customClass="default"
-					v-model="newItem.description"
+                    :value="newItem.description"
+                    @input="newItem.description = $event.target.value"
 				/>
                 <span class="form-vertical-spacer"></span>
                 <SubmitButtonComponent
                     :title="'CREATE'"
                     customClass="default"
-                    @onAction="goManageGroup"
+                    @onAction="goCreateExpense"
                 />
                 <span class="form-horiz-spacer"></span>
                 <SubmitButtonComponent
@@ -110,15 +116,15 @@
 
 				<template v-slot:body>
 					<tr
-						v-for="item in outlines"
+						v-for="item in expenses"
 						:key="item.id"
 						@click="handleRowClick(item.id)"
 					>
 						<td>{{ item.date }}</td>
 						<td>{{ item.name }}</td>
                         <td>{{ item.description }}</td>
-						<td>{{ item.user }}</td>
-                        <td class="cell-type-currency">{{ item.total }}</td>
+						<td>{{ item.user_name }}</td>
+                        <td class="cell-type-currency">{{ convertNumberToCurrency(item.total) }}</td>
                         <td class="cell-type-menu"><font-awesome-icon icon="fa-solid fa-caret-down" /></td>
 					</tr>
 				</template>
@@ -141,7 +147,13 @@
 
         <!-- SECTION: Right -->
         <div class="module-view-right">
-
+            <div v-if="outline" class="module-summary">
+                <h2>{{ outline.name }}</h2><br><br>
+                <span class="summary-label">Total:</span>
+                <span class="summary-value">{{ convertNumberToCurrency(outline.total) }}</span>
+                <span class="summary-label">Total this Month:</span>
+                <span class="summary-value">{{ convertNumberToCurrency(outline.current_month_total) }}</span>
+            </div>
         </div>
 
     </div>
@@ -151,12 +163,13 @@
 import { defineComponent, ref } from 'vue'
 import { useExpenseStore } from '../stores/expense'
 import { useOutlineStore } from '../stores/outline'
+import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleExpensesMixin from '@/mixins/module-expenses-mixin'
 
 export default defineComponent({
     name: 'ExpensesView',
-    mixins: [ModuleListingMixin, ModuleExpensesMixin],
+    mixins: [GlobalHelpersMixin, ModuleListingMixin, ModuleExpensesMixin],
     components: {
     },
     data() {
@@ -164,117 +177,6 @@ export default defineComponent({
             // Define data properties
             name: '',
             isDisplayCreateForm: false,
-            items: [],
-            itemsArray: [
-                [
-                    {
-                        id: 1,
-                        name: 'Expense 1',
-                        description: 'Expense 1 description',
-                        user: 'Cristian',
-                        total: 3000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 2,
-                        name: 'Expense 2',
-                        description: 'Expense 2 description',
-                        user: 'Silvi',
-                        total: 10000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 3,
-                        name: 'Expense 3',
-                        description: 'Expense 3 description',
-                        user: 'Cristian',
-                        total: 250000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 4,
-                        name: 'Expense 1',
-                        description: 'Expense 1 description',
-                        user: 'Cristian',
-                        total: 3000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 5,
-                        name: 'Expense 2',
-                        description: 'Expense 2 description',
-                        user: 'Silvi',
-                        total: 10000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 6,
-                        name: 'Expense 3',
-                        description: 'Expense 3 description',
-                        user: 'Cristian',
-                        total: 250000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 7,
-                        name: 'Expense 1',
-                        description: 'Expense 1 description',
-                        user: 'Cristian',
-                        total: 3000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 8,
-                        name: 'Expense 2',
-                        description: 'Expense 2 description',
-                        user: 'Silvi',
-                        total: 10000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 9,
-                        name: 'Expense 3',
-                        description: 'Expense 3 description',
-                        user: 'Cristian',
-                        total: 250000.00,
-                        date: 'May 1 2023'
-                    }
-                ],
-                [
-                    {
-                        id: 1,
-                        name: 'Expense 1',
-                        description: 'Expense 1 description',
-                        user: 'Cristian',
-                        total: 3000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 2,
-                        name: 'Expense 2',
-                        description: 'Expense 2 description',
-                        user: 'Silvi',
-                        total: 10000000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 3,
-                        name: 'Expense 3',
-                        description: 'Expense 3 description',
-                        user: 'Cristian',
-                        total: 250000.00,
-                        date: 'May 1 2023'
-                    },
-                    {
-                        id: 4,
-                        name: 'Expense 1',
-                        description: 'Expense 1 description',
-                        user: 'Cristian',
-                        total: 3000000.00,
-                        date: 'May 1 2023'
-                    }
-                ]
-            ],
             users: [
                 {
                     id: 1,
@@ -288,45 +190,71 @@ export default defineComponent({
         }
     },
     computed: {
+        expenses() {
+			return useExpenseStore().expenses
+		},
+        outline() {
+			return useOutlineStore().outline
+		},
         outlines() {
 			return useOutlineStore().outlines
 		},
     },
-    watch: {},
-    methods: {
-        goManageGroup() {
-            console.log('Manage group')
+    watch: {
+        outlines(newOutlinesVal) {
+            newOutlinesVal.forEach( (item) => {
+                if ( item.is_selected == true ) {
+                    this.loadExpenses(item.id)
+                }
+            })
         },
-        loadItems(outlineId = null) {
-            if (outlineId) {
-                this.items = this.itemsArray[outlineId]
-            } else {
-                this.items = this.itemsArray[0]
-            }
-            // const expenseStore = useExpenseStore()
-
-            // expenseStore.list()
-            // .then(() => {
-            //     // Perform any actions after successful register
-            //
-            // })
-            // .catch((error) => {
-            //     // Handle register error
-            //     console.error('Register error:', error)
-            // })
+        ['newItem']: {
+			handler: function () {
+                //Watch newExpense change
+			},
+			deep: true
+		}
+    },
+    methods: {
+        goCreateNewGroup() {
+            this.$router.push('/outlines?action=new')
+        },
+        goCreateExpense() {
+            const expenseStore = useExpenseStore()
+            this.outlines.forEach( (outline) => {
+                // Set is_selected to false for all other items
+                if ( outline.is_selected == true ) {
+                    const payload = this.newItem
+                    payload.user_id = this.newItem.user.id
+                    payload.user_name = this.newItem.user.name
+                    payload.outline_id = outline.id
+                    expenseStore.create(payload)
+                }
+            })
+        },
+        goManageGroup() {
+            // console.log('Manage group')
+        },
+        loadExpenses(outlineId) {
+            const expenseStore = useExpenseStore()
+            expenseStore.list(outlineId)
         },
         loadOutlines() {
             const outlineStore = useOutlineStore()
             outlineStore.list()
         },
         onNavGroupClicked(group) {
+            const outlineStore = useOutlineStore()
             this.outlines.forEach( (item) => {
-                // Set isSelected to false for all other items
+                // Set is_selected to false for all other items
                 if ( item !== group ) {
-                    item.isSelected = false
-                } else {
-                    item.isSelected = true
-                    this.loadItems(group.id)
+                    item.is_selected = false
+                }
+                // Load expenses for selected items
+                else {
+                    item.is_selected = true
+                    outlineStore.outline = item
+                    this.loadExpenses(group.id) // Load outline expenses
                 }
             })
         }
@@ -336,7 +264,6 @@ export default defineComponent({
         // Perform any necessary setup or initialization here
     },
     mounted() {
-        this.loadItems()
         this.loadOutlines()
     },
 })
@@ -387,6 +314,21 @@ export default defineComponent({
         background: #f7f7f1;
         box-shadow: -5px 5px 5px var(--colorGray);
         vertical-align: top;
+        padding: 60px 3em;
+
+        .module-summary {
+            .summary-label {
+                font-weight: bold;
+            }
+            .summary-value {
+                display: block;
+                background: white;
+                margin-top: 10px;
+                margin-bottom: 30px;
+                padding: 8px 12px;
+                border-radius: 5px;
+            }
+        }
     }
 
 }

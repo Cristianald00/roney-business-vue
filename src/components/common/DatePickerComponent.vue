@@ -1,48 +1,24 @@
 <template>
-	<div class="input-out-container" style="display: inline-block">
-		<span class="error-message">{{ errorMessage }}</span>
-		<div :class="containerStyle">
-			<input
-				:id="id"
-				:name="name"
-				:type="theType"
-				:class="className"
-				:placeholder="placeholder"
-				:disabled="disabled"
-				autocomplete="off"
-				v-bind:value="value"
-				v-on:input="validateData($event.target.value)"
-			/>
-			<button
-				v-if="isPassword"
-				type="button"
-				name="is_password"
-				:class="passBoxClassName"
-				:disabled="disabled"
-				@click="togglePasswordVisibility()"
-			>
-				<i
-					class="fa-solid"
-					:class="{
-						'fa-eye-slash': showPassword,
-						'fa-eye': !showPassword
-					}"
-				></i>
-			</button>
-		</div>
+	<div :class="containerStyle">
+		<input
+			type="date"
+			:id="id"
+			:name="name"
+			:class="className"
+			v-bind:value="value"
+			v-on:input="validateData($event.target.value)"
+			pattern="\d{4}-\d{2}-\d{2}"
+			:disabled="disabled"
+		/>
 	</div>
 </template>
 
 <script>
 export default {
-	name: 'InputComponent',
+	name: 'DatePickerComponent',
 	props: {
 		id: String,
 		name: String,
-		type: {
-			type: String,
-			default: 'text'
-		},
 		customClass: {
 			default: 'default',
 			type: String
@@ -58,55 +34,38 @@ export default {
 				required: ''
 			}
 		},
-		autocomplete: {
-			type: String,
-			default: 'off'
-		},
 		value: [String, Number],
 		disabled: {
 			type: Boolean,
 			required: false,
 			default: false,
-			note: 'Disable the input'
+			note: 'Disable the datepicker'
 		}
 	},
 	data() {
 		return {
 			className:
 				(this.disabled == true
-					? 'text-input-disabled-style'
-					: 'text-input')
+					? 'date-picker-disabled-style'
+					: 'date-picker')
 				+ ' '
 				+ this.customClass,
-			passBoxClassName: 'is-password-btn pass-' + this.customClass,
-			errorMessage: '',
-			theType: this.type,
-			showPassword: false
+			errorMessage: ''
 		}
 	},
 	computed: {
-		disabledField() {
-			return false
-		},
-		isPassword() {
-			return this.type == 'password'
-		},
 		containerStyle() {
 			return this.isDarkStyle == 'on'
-				? 'input-container dark-style'
-				: 'input-container'
-		},
-		disabledStyle() {
-			return this.className
+				? 'date-container dark-style'
+				: 'date-container'
 		}
 	},
 	watch: {
-		className(newVal) {
-			// this.className = newVal
-		},
 		disabled(newVal) {
 			this.className
-				= (newVal == true ? 'text-input-disabled-style' : 'text-input')
+				= (newVal == true
+					? 'date-picker-disabled-style'
+					: 'date-picker')
 				+ ' '
 				+ this.customClass
 		}
@@ -129,49 +88,39 @@ export default {
 			}
 			// Always emmit changed value
 			this.$emit('value', value)
-		},
-		togglePasswordVisibility() {
-			this.theType = this.theType == 'password' ? 'text' : 'password'
-			this.showPassword = !this.showPassword
 		}
+	},
+	mounted() {
+		this.validateData(this.value)
 	}
 }
 </script>
 
 <style lang="scss" scoped>
-.error-message {
-	color: #e83239;
-	font-size: 16px;
-}
-
-.input-out-container {
-	display: inline-block;
-	max-width: 100%;
-}
-
-.input-container {
+.date-container {
 	position: relative;
 	display: inline-block;
-	max-width: 100%;
-	margin: auto;
 
-	.text-input {
-		display: block;
+	.date-picker {
+		display: inline-block;
 		padding: var(--inputPadding);
 		color: var(--colorLetterBlack);
+		font-size: 13px;
 		border: 1px solid #8f8b8b;
 		border-radius: 4px;
 		letter-spacing: 0.12px;
-		font-size: 14px;
+		font: normal normal normal 13px/26px Montserrat;
+		text-align: left;
 	}
-	.text-input-disabled-style {
-		display: block;
+	.date-picker-disabled-style {
 		padding: var(--inputPadding);
 		color: var(--colorLetterBlack);
+		font-size: 13px;
 		border: 1px solid #8f8b8b;
 		border-radius: 4px;
 		letter-spacing: 0.12px;
-		font-size: 14px;
+		font: normal normal normal 13px/26px Montserrat;
+		text-align: left;
 		background: #f8f9fb;
 	}
 	::placeholder {
@@ -187,43 +136,37 @@ export default {
 		/* Support for Microsoft Edge */
 		color: var(--colorLetterBlack);
 	}
-
 	.small {
 		width: 110px;
 	}
 	.medium {
 		width: 210px;
+		height: 30px;
 	}
 	.default {
-		width: 400px;
-		max-width: 100%;
+		max-width: 90%;
+		width: 440px;
+		height: 36px;
 	}
 	.wide {
 		width: 260px;
+	}
+	.full-long {
+		width: 93%;
+		height: 36px;
 	}
 	.wide-tall {
 		width: 460px;
 		height: 56px;
 		font-size: 16px;
 	}
-	.wide-long {
-		width: 655px;
-	}
-	.is-password-btn {
-		position: absolute;
-		top: 20%;
-		right: 16px;
-		color: var(--colorLetterBlack);
-		font-size: 1.2em;
-	}
-	.pass-default {
-		top: 5px;
-		right: 18%;
+	.long {
+		width: 560px;
+		height: 36px;
 	}
 }
-
 .dark-style {
-	.text-input {
+	.date-picker {
 		color: var(--colorLetterWhite);
 		border: 1px solid var(--colorLetterWhite);
 	}
@@ -238,9 +181,6 @@ export default {
 	}
 	::-ms-input-placeholder {
 		/* Support for Microsoft Edge */
-		color: var(--colorLetterWhite);
-	}
-	.is-password-btn {
 		color: var(--colorLetterWhite);
 	}
 }

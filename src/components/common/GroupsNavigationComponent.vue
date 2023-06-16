@@ -6,7 +6,7 @@
 			:name="'group-' + group.id"
 			:class="{
 				'group-item': true,
-				'group-selected-item': group.isSelected
+				'group-selected-item': group.is_selected
 			}"
 			@click="toggleGroupSelection(group)"
 		>
@@ -16,6 +16,7 @@
 			type="button"
 			name="group-new-btn"
 			class="group-item"
+			@click="toggleAddNewGroup()"
 		>
 			<font-awesome-icon icon="fa-solid fa-plus" />
 		</button>
@@ -39,6 +40,10 @@ export default {
 
 	},
 	methods: {
+		toggleAddNewGroup() {
+			// Notify the parent component
+			this.$emit('onClickedAddNew')
+		},
 		toggleGroupSelection(group) {
 			// Notify the parent component
 			this.$emit('onClicked', group)

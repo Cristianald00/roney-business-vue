@@ -327,7 +327,7 @@ export default {
 				}
 			}
 			// Always emmit changed value
-			this.$emit('input', value)
+			this.$emit('value', value)
 		}
 	},
 	watch: {

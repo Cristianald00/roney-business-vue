@@ -4,6 +4,7 @@ import authorizationMiddleware from '../middleware/authorization'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import ExpensesView from '../views/ExpensesView.vue'
+import OutlinesView from '../views/OutlinesView.vue'
 import RegisterView from '../views/RegisterView.vue'
 
 const routes = [
@@ -41,6 +42,15 @@ const routes = [
         meta: {
             allowsPublicAccess: true,
             requiresAuth: false
+        }
+    },
+    {
+        path: '/outlines',
+        name: 'outlines',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: true,
+            requiresAuth: true
         }
     },
     {
