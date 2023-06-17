@@ -134,7 +134,9 @@ export default {
 }
 
 .cell-type-currency {
+	font-weight: 500;
 	text-align: right;
+	color: #209455;
 }
 .cell-type-menu {
 	text-align: center;

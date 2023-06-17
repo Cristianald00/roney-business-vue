@@ -1,6 +1,7 @@
 import axios from '../plugins/axios'
 import { useOutlineStore } from '../stores/outline'
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { usePaginationStore } from '../stores/pagination'
 
 export const useExpenseStore = defineStore({
     id: 'expense',
@@ -14,9 +15,18 @@ export const useExpenseStore = defineStore({
         /**
         * List expenses
         */
-        async list(outlineId) {
-            const expenseData = await apiExpenseList(outlineId)
+        async list(outlineId, pagination) {
+            const expenseData = await apiExpenseList(outlineId, pagination)
             const expenses = expenseData.expenses
+
+            // Update Pagination Store
+            const paginationStore = usePaginationStore()
+            paginationStore.orderBy = expenseData.order_by
+            paginationStore.page = expenseData.page
+            paginationStore.pageQty = expenseData.page_qty
+            paginationStore.pageLast = expenseData.page_last
+            paginationStore.pageTotal = expenseData.page_total
+
             // Update states
             this.$patch({
                 expenses: expenses
@@ -28,7 +38,7 @@ export const useExpenseStore = defineStore({
         async create(payload) {
             const expenseData = await apiExpenseCreate(payload)
 
-            // Update other stores
+            // Update Outline Store
             const outlineStore = useOutlineStore()
             outlineStore.outline = expenseData['outline']
             const outlines = outlineStore.outlines
@@ -58,11 +68,10 @@ export const useExpenseStore = defineStore({
 * Api Requests
 */
 
-function apiExpenseList(outlineId) {
-    const page = 1
+function apiExpenseList(outlineId, pagination = null) {
     return axios.get('/api/expenses', {
         params: {
-            page,
+            pagination,
             outlineId
         }
     })

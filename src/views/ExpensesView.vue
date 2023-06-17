@@ -121,7 +121,7 @@
 						@click="handleRowClick(item.id)"
 					>
 						<td>{{ item.date }}</td>
-						<td>{{ item.name }}</td>
+						<td style="font-weight: 500;">{{ item.name }}</td>
                         <td>{{ item.description }}</td>
 						<td>{{ item.user_name }}</td>
                         <td class="cell-type-currency">{{ convertNumberToCurrency(item.total) }}</td>
@@ -133,10 +133,12 @@
 						<td colspan="100%">
 							<PaginationComponent
 								:pagination="pagination"
-								:perPage="perPage"
+                                :page="page"
+                                :pageTotal="pageTotal"
+								:pageQty="pageQty"
 								:keyword="keyword"
 								:tableType="tableType"
-								@pagechanged="onPageChange"
+								@onPageChange="goChangePage"
 							/>
 						</td>
 					</tr>
@@ -151,7 +153,7 @@
                 <h2>{{ outline.name }}</h2><br><br>
                 <span class="summary-label">Total:</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.total) }}</span>
-                <span class="summary-label">Total this Month:</span>
+                <span class="summary-label">Total this Month: {{ pageTotal }}</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.current_month_total) }}</span>
             </div>
         </div>
@@ -163,6 +165,7 @@
 import { defineComponent, ref } from 'vue'
 import { useExpenseStore } from '../stores/expense'
 import { useOutlineStore } from '../stores/outline'
+import { usePaginationStore } from '../stores/pagination'
 import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleExpensesMixin from '@/mixins/module-expenses-mixin'
@@ -199,6 +202,21 @@ export default defineComponent({
         outlines() {
 			return useOutlineStore().outlines
 		},
+        orderBy() {
+			return usePaginationStore().orderBy
+		},
+        page() {
+			return usePaginationStore().page
+		},
+        pageQty() {
+			return usePaginationStore().pageQty
+		},
+        pageLast() {
+			return usePaginationStore().pageLast
+		},
+        pageTotal() {
+			return usePaginationStore().pageTotal
+		}
     },
     watch: {
         outlines(newOutlinesVal) {
@@ -216,6 +234,18 @@ export default defineComponent({
 		}
     },
     methods: {
+        goChangePage(payload) {
+            console.log('clicked');
+            const paginationPayload = payload
+            const firstItem = this.expenses[0]
+            const latestItem = this.expenses[this.expenses.length - 1]
+            if ( payload.pageDirection == 'previous' ) {
+                paginationPayload.page_last = firstItem ? firstItem.id : null
+            } else {
+                paginationPayload.page_last = latestItem ? latestItem.id : null
+            }
+            this.loadExpenses( this.outline.id, paginationPayload)
+        },
         goCreateNewGroup() {
             this.$router.push('/outlines?action=new')
         },
@@ -229,15 +259,30 @@ export default defineComponent({
                     payload.user_name = this.newItem.user.name
                     payload.outline_id = outline.id
                     expenseStore.create(payload)
+                    // Reset
+                    this.newItem = {
+        				name: '',
+        				description: '',
+        				user: '',
+        				total: 0,
+        				date: new Date().toISOString().slice(0, 10)
+        			}
                 }
             })
         },
         goManageGroup() {
             // console.log('Manage group')
         },
-        loadExpenses(outlineId) {
+        loadExpenses(outlineId, paginationPayload = null) {
             const expenseStore = useExpenseStore()
-            expenseStore.list(outlineId)
+            const pagination = {
+                order_by: 'key',
+                page_qty: paginationPayload ? paginationPayload.per_page : 25,
+                page_last: paginationPayload ? paginationPayload.page_last : null,
+                page: paginationPayload ? paginationPayload.page : 1
+            }
+
+            expenseStore.list(outlineId, pagination)
         },
         loadOutlines() {
             const outlineStore = useOutlineStore()
@@ -317,6 +362,7 @@ export default defineComponent({
         padding: 60px 3em;
 
         .module-summary {
+            font-size: 1.1em;
             .summary-label {
                 font-weight: bold;
             }
