@@ -16,28 +16,10 @@
 				/>
                 <span class="form-horiz-spacer"></span>
                 <InputComponent
-					id="item-date-input"
-					name="item-date-input"
-					placeholder="Date"
-                    customClass="medium"
-					:value="newItem.date"
-                    @input="newItem.date = $event.target.value"
-				/>
-                <span class="form-vertical-spacer"></span>
-                <InputComponent
-					id="item-total-input"
-					name="item-total-input"
-					placeholder="Total (0.00)"
-                    customClass="medium"
-					:value="newItem.total"
-                    @input="newItem.total = $event.target.value"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <InputComponent
 					id="item-desc-input"
 					name="item-desc-input"
 					placeholder="Description"
-                    customClass="default"
+                    customClass="wider"
 					:value="newItem.description"
                     @input="newItem.description = $event.target.value"
 				/>
@@ -133,51 +115,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.module-view-container {
-
-	.module-view-center {
-        display: inline-block;
-        width: 70%;
-        vertical-align: top;
-
-        .module-group-options, .module-list-options {
-            .icon-button-component {
-                padding: 1em;
-            }
-            text-align: right;
-        }
-
-        .module-group-options {
-            margin-top: 1em;
-        }
-
-        .module-group-create-form {
-            display: block;
-            margin: 1em 0;
-            text-align: left;
-            .form-horiz-spacer {
-                display: inline-block;
-                width: 20px;
-            }
-            .form-vertical-spacer {
-                display: block;
-                height: 10px;
-            }
-        }
-
-        .column_sort {
-        	cursor: pointer;
-        }
-    }
-    .module-view-right {
-        display: inline-block;
-        width: 28%;
-        margin-left: 2%;
-        min-height: 95vh;
-        background: #f7f7f1;
-        box-shadow: -5px 5px 5px var(--colorGray);
-        vertical-align: top;
-    }
-
-}
+@import '@/styles/ModuleViewContainer.scss';
 </style>

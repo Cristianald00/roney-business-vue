@@ -1,3 +1,4 @@
+import router from '../router'
 import axios from '../plugins/axios'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
@@ -6,7 +7,7 @@ export const outlineStore = defineStore({
     persist: true,
     state: () => ({
         outline: null,
-        outlines: null
+        outlines: []
     }),
 
     actions: {
@@ -18,12 +19,16 @@ export const outlineStore = defineStore({
             let outlines = outlineData.outlines
             let outline = null
 
-            outlines.forEach( (item) => {
-                // Set is_selected putline as main outline state
-                if ( item.is_selected == true ) {
-                    outline = item
-                }
-            })
+            if (outlines) {
+                outlines.forEach( (item) => {
+                    // Set is_selected putline as main outline state
+                    if ( item.is_selected == true ) {
+                        outline = item
+                    }
+                })
+            } else {
+                outlines = []
+            }
 
             // Update states
             this.$patch({
@@ -36,12 +41,23 @@ export const outlineStore = defineStore({
         */
         async create(payload) {
             const outlineData = await apiOutlineCreate(payload)
-            let outlines = outlineData.outlines
+            let outline = outlineData.outline
+
+            // Include into existing outlines
+            const outlines = this.outlines
+            if ( !outlines ) {
+                outlines = []
+            }
+            outlines.push(outline)
 
             // Update states
             this.$patch({
+                outline: outline,
                 outlines: outlines
             })
+
+            // Redirect back to Expenses
+            router.push('/expenses')
         },
     },
 })

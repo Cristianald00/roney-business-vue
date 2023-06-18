@@ -70,11 +70,13 @@
                     @input="newItem.total = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
+                <span>{{ convertNumberToCurrency(newItem.total) }}</span>
+                <span class="form-vertical-spacer"></span>
                 <InputComponent
 					id="item-desc-input"
 					name="item-desc-input"
 					placeholder="Description"
-                    customClass="default"
+                    customClass="wider"
                     :value="newItem.description"
                     @input="newItem.description = $event.target.value"
 				/>
@@ -93,7 +95,7 @@
             </div>
 
             <!-- SECTION: Items List -->
-            <TableComponent>
+            <TableComponent v-if="outlines.length > 0 && expenses.length > 0">
 				<template v-slot:head>
 					<th
 						v-for="header in headers"
@@ -144,6 +146,22 @@
 					</tr>
 				</template>
 			</TableComponent>
+            <div v-else-if="outlines.length < 1" class="create-item-alert">
+                <h1>Hey! You don't have any Expenses Group yet,<br> start creating one.</h1>
+                <SubmitButtonComponent
+                    :title="'Create Group'"
+                    customClass="default"
+                    @onAction="goCreateNewGroup"
+                />
+            </div>
+            <div v-else-if="expenses.length < 1" class="create-item-alert">
+                <h1>You haven't created any expense so far.</h1>
+                <SubmitButtonComponent
+                    :title="'Create Expense'"
+                    customClass="default"
+                    @onAction="isDisplayCreateForm = true"
+                />
+            </div>
 
         </div>
 
@@ -316,4 +334,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/styles/ModuleViewContainer.scss';
+
+.create-item-alert {
+    margin-top: 2em;
+    text-align: center;
+    button {
+        margin-top: 2em;
+    }
+}
 </style>

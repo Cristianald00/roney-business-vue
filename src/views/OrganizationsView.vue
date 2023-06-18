@@ -51,9 +51,23 @@
 
             <!-- SECTION: Edit Item -->
             <div v-else="view == 'edit'" class="organization-details-container">
-                <div class="">
-                    <h2>{{ organization.name }}</h2>
+                <div class="" v-if="organization">
+                    <h1>{{ organization.name }} <span style="font-size: 13px;">current</span></h1>
                     <p>{{ organization.description }}</p>
+                </div>
+            </div>
+
+            <!-- SECTION: List items -->
+            <br><br>
+            <div class="module-group-list">
+                <h3>Teams</h3>
+                <div
+                    class="module-group-list-item"
+                    v-for="item in organizations"
+                    :key="item.id"
+                >
+                    <span>{{ item.name }}</span>
+                    <span @click="goMakeCurrent(item.id)" class="switch-to-team-btn">Switch to Team</span>
                 </div>
             </div>
 
@@ -69,7 +83,8 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
-import { outlineStore } from '../stores/outline'
+import { userStore } from '../stores/user'
+import { organizationStore } from '../stores/organization'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 
 export default defineComponent({
@@ -90,25 +105,37 @@ export default defineComponent({
     },
     computed: {
         organization() {
-            return {
-                id: 1,
-                name: 'Glampings',
-                description: 'This is the organization description'
-            }
+            return organizationStore().organization
         },
-        outlines() {
-			return outlineStore().outlines
+        organizations() {
+			return organizationStore().organizations
 		},
     },
     watch: {
     },
     methods: {
         goCreateTeam() {
-            const store = orgaizationStore()
+            const store = organizationStore()
             store.create(this.newItem)
+            // Reset
+            this.newItem = {
+                name: '',
+                description: ''
+            }
+            this.view = 'edit'
         },
-        loadOutlines() {
-            const store = outlineStore()
+        async goMakeCurrent(id) {
+            const store = organizationStore()
+            await store.makeCurrent(id)
+        },
+        loadOrganization() {
+            const store = organizationStore()
+            const theUserStore = userStore()
+            const organizationId = theUserStore.user ? theUserStore.user.current_organization : null
+            store.show(organizationId)
+        },
+        loadOrganizations() {
+            const store = organizationStore()
             store.list()
         }
     },
@@ -116,66 +143,38 @@ export default defineComponent({
         // Lifecycle hook: beforeMount
         // Perform any necessary setup or initialization here
     },
-    mounted() {
-        if ( this.$route.query.action ) {
-            const action = this.$route.query.action
+    async mounted() {
+        // Display applicable view
+        let view = 'edit'
+        const action = this.$route.query.action
+        if ( action ) {
             if ( action == 'new' ) {
-                this.view = 'create'
-            } else {
-                this.view = 'edit'
+                view = 'create'
+            } else if ( action == 'switch' ) {
+                const id = this.$route.query.id
+                await this.goMakeCurrent(id)
             }
         }
-        // this.loadOutlines()
+        this.view = view
+
+        // Load data
+        this.loadOrganization()
+        this.loadOrganizations()
     },
 })
 </script>
 
 <style lang="scss" scoped>
-.module-view-container {
+@import '@/styles/ModuleViewContainer.scss';
 
-	.module-view-center {
-        display: inline-block;
-        width: 70%;
-        vertical-align: top;
-
-        .module-group-options, .module-list-options {
-            .icon-button-component {
-                padding: 1em;
-            }
-            text-align: right;
-        }
-
-        .module-group-options {
-            margin-top: 1em;
-        }
-
-        .module-group-create-form {
-            display: block;
-            margin: 1em 0;
-            text-align: left;
-            .form-horiz-spacer {
-                display: inline-block;
-                width: 20px;
-            }
-            .form-vertical-spacer {
-                display: block;
-                height: 10px;
-            }
-        }
-
-        .column_sort {
-        	cursor: pointer;
-        }
+.module-group-list {
+    .switch-to-team-btn {
+        margin-left: 1em;
+        cursor: pointer;
+        color: rgb(0, 189, 126);
     }
-    .module-view-right {
-        display: inline-block;
-        width: 28%;
-        margin-left: 2%;
-        min-height: 95vh;
-        background: #f7f7f1;
-        box-shadow: -5px 5px 5px var(--colorGray);
-        vertical-align: top;
+    .switch-to-team-btn:hover {
+        text-decoration: underline;
     }
-
 }
 </style>

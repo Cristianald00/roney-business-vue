@@ -39,9 +39,9 @@ export const expenseStore = defineStore({
             const expenseData = await apiExpenseCreate(payload)
 
             // Update Outline Store
-            const outlineStore = outlineStore()
-            outlineStore.outline = expenseData['outline']
-            const outlines = outlineStore.outlines
+            const theOutlineStore = outlineStore()
+            theOutlineStore.outline = expenseData['outline']
+            const outlines = theOutlineStore.outlines
 
             // Replace outline object with matching ID
             const expenseOutline = expenseData['outline']
@@ -52,7 +52,7 @@ export const expenseStore = defineStore({
                 }
                 return outline
             })
-            outlineStore.outlines = updatedOutlines
+            theOutlineStore.outlines = updatedOutlines
 
             // Update stores
             const expense = expenseData['expense']
