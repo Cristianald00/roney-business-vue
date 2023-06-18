@@ -1,7 +1,7 @@
 import axios from '../plugins/axios'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
-export const useOutlineStore = defineStore({
+export const outlineStore = defineStore({
     id: 'outline',
     persist: true,
     state: () => ({

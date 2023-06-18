@@ -201,6 +201,9 @@ export default {
 	.wide {
 		width: 260px;
 	}
+	.wider {
+		width: 460px;
+	}
 	.wide-tall {
 		width: 460px;
 		height: 56px;

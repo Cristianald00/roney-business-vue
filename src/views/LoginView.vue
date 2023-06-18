@@ -7,8 +7,11 @@
             <div class="">
                 <input type="password" v-model="password" placeholder="Password" />
             </div>
+            <span v-if="error != ''" class="login-error-message">{{ error }}</span>
             <button>Login</button>
         </form>
+        <br><br>
+        <router-link class="header-nav-item" to="/register"><span>Don't have an account? Sign up</span></router-link>
     </div>
 </template>
 
@@ -22,7 +25,7 @@ export default defineComponent({
     },
     data() {
         return {
-            // Define data properties
+            error: '',
             username: '',
             password: '',
         }
@@ -47,6 +50,15 @@ export default defineComponent({
     },
     methods: {
         login() {
+            if ( this.username == '' ) {
+                this.error = 'Error: You must enter an email'
+                return
+            }
+            if ( this.password == '' ) {
+                this.error = 'Error: You must enter a password'
+                return
+            }
+
             // Method for handling the login action
             const store = userStore()
             store.login(this.username, this.password)
@@ -64,39 +76,6 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped="">
-.login-container {
-    display: block;
-    width: 100%;
-    margin-top: 20vh;
-    min-height: 70vh;
-    text-align: center;
-
-    .login-form {
-        display: block;
-        margin: auto;
-        div {
-            display: block;
-            margin-bottom: 1em;
-            input {
-                display: inline-block;
-                width: 300px;
-                padding: 10px 14px;
-                border: 1px solid var(--colorGray);
-                border-radius: 5px;
-            }
-        }
-        button {
-            cursor: pointer;
-            display: block;
-            margin: auto;
-            width: 300px;
-            background: var(--colorLightBlack);
-            color: white;
-            padding: 10px 14px;
-            border: 1px solid var(--colorGray);
-            border-radius: 5px;
-        }
-    }
-}
+<style lang="scss" scoped>
+@import '@/styles/LoginContainer.scss';
 </style>

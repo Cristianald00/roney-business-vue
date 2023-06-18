@@ -37,7 +37,7 @@ export const userStore = defineStore({
                 access_token: userData.token
             })
             // Redirect to Dashboard
-            router.replace({ path: '/expenses' });
+            router.replace({ path: '/expenses' })
         },
 
         /**
@@ -50,7 +50,7 @@ export const userStore = defineStore({
                 access_token: userData.token
             })
             // Redirect to Dashboard
-            router.push('/expenses')
+            router.replace({ path: '/expenses' })
         },
     },
 })

@@ -163,9 +163,9 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
-import { useExpenseStore } from '../stores/expense'
-import { useOutlineStore } from '../stores/outline'
-import { usePaginationStore } from '../stores/pagination'
+import { expenseStore } from '../stores/expense'
+import { outlineStore } from '../stores/outline'
+import { paginationStore } from '../stores/pagination'
 import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleExpensesMixin from '@/mixins/module-expenses-mixin'
@@ -194,28 +194,28 @@ export default defineComponent({
     },
     computed: {
         expenses() {
-			return useExpenseStore().expenses
+			return expenseStore().expenses
 		},
         outline() {
-			return useOutlineStore().outline
+			return outlineStore().outline
 		},
         outlines() {
-			return useOutlineStore().outlines
+			return outlineStore().outlines
 		},
         orderBy() {
-			return usePaginationStore().orderBy
+			return paginationStore().orderBy
 		},
         page() {
-			return usePaginationStore().page
+			return paginationStore().page
 		},
         pageQty() {
-			return usePaginationStore().pageQty
+			return paginationStore().pageQty
 		},
         pageLast() {
-			return usePaginationStore().pageLast
+			return paginationStore().pageLast
 		},
         pageTotal() {
-			return usePaginationStore().pageTotal
+			return paginationStore().pageTotal
 		}
     },
     watch: {
@@ -250,7 +250,7 @@ export default defineComponent({
             this.$router.push('/outlines?action=new')
         },
         goCreateExpense() {
-            const expenseStore = useExpenseStore()
+            const store = expenseStore()
             this.outlines.forEach( (outline) => {
                 // Set is_selected to false for all other items
                 if ( outline.is_selected == true ) {
@@ -258,7 +258,7 @@ export default defineComponent({
                     payload.user_id = this.newItem.user.id
                     payload.user_name = this.newItem.user.name
                     payload.outline_id = outline.id
-                    expenseStore.create(payload)
+                    store.create(payload)
                     // Reset
                     this.newItem = {
         				name: '',
@@ -274,7 +274,7 @@ export default defineComponent({
             // console.log('Manage group')
         },
         loadExpenses(outlineId, paginationPayload = null) {
-            const expenseStore = useExpenseStore()
+            const store = expenseStore()
             const pagination = {
                 order_by: 'key',
                 page_qty: paginationPayload ? paginationPayload.per_page : 25,
@@ -282,14 +282,14 @@ export default defineComponent({
                 page: paginationPayload ? paginationPayload.page : 1
             }
 
-            expenseStore.list(outlineId, pagination)
+            store.list(outlineId, pagination)
         },
         loadOutlines() {
-            const outlineStore = useOutlineStore()
-            outlineStore.list()
+            const store = outlineStore()
+            store.list()
         },
         onNavGroupClicked(group) {
-            const outlineStore = useOutlineStore()
+            const store = outlineStore()
             this.outlines.forEach( (item) => {
                 // Set is_selected to false for all other items
                 if ( item !== group ) {
@@ -298,7 +298,7 @@ export default defineComponent({
                 // Load expenses for selected items
                 else {
                     item.is_selected = true
-                    outlineStore.outline = item
+                    store.outline = item
                     this.loadExpenses(group.id) // Load outline expenses
                 }
             })
@@ -315,67 +315,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.module-view-container {
-
-	.module-view-center {
-        display: inline-block;
-        width: 70%;
-        vertical-align: top;
-
-        .module-group-options, .module-list-options {
-            .icon-button-component {
-                padding: 1em;
-            }
-            text-align: right;
-        }
-
-        .module-group-options {
-            margin-top: 1em;
-        }
-
-        .module-group-create-form {
-            display: block;
-            margin: 1em 0;
-            text-align: left;
-            .form-horiz-spacer {
-                display: inline-block;
-                width: 20px;
-            }
-            .form-vertical-spacer {
-                display: block;
-                height: 10px;
-            }
-        }
-
-        .column_sort {
-        	cursor: pointer;
-        }
-    }
-    .module-view-right {
-        display: inline-block;
-        width: 28%;
-        margin-left: 2%;
-        min-height: 95vh;
-        background: #f7f7f1;
-        box-shadow: -5px 5px 5px var(--colorGray);
-        vertical-align: top;
-        padding: 60px 3em;
-
-        .module-summary {
-            font-size: 1.1em;
-            .summary-label {
-                font-weight: bold;
-            }
-            .summary-value {
-                display: block;
-                background: white;
-                margin-top: 10px;
-                margin-bottom: 30px;
-                padding: 8px 12px;
-                border-radius: 5px;
-            }
-        }
-    }
-
-}
+@import '@/styles/ModuleViewContainer.scss';
 </style>

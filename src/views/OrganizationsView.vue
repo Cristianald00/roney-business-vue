@@ -4,40 +4,34 @@
         <!-- SECTION: Center -->
         <div class="module-view-center">
 
+            <!-- SECTION: Center Header -->
+            <div class="module-group-options">
+                <IconButtonComponent
+    				icon="fa-solid fa-plus"
+                    title="Create Team"
+                    helper="Create Team"
+                    :selected="false"
+    				customClass=""
+                    @onAction="view = 'create'"
+    			/>
+            </div>
+
             <!-- SECTION: Create item -->
             <div v-if="view == 'create'" class="module-group-create-form">
                 <InputComponent
 					id="item-name-input"
 					name="item-name-input"
-					placeholder="Group Name"
+					placeholder="Team Name"
                     customClass="medium"
 					:value="newItem.name"
                     @input="newItem.name = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
                 <InputComponent
-					id="item-date-input"
-					name="item-date-input"
-					placeholder="Date"
-                    customClass="medium"
-					:value="newItem.date"
-                    @input="newItem.date = $event.target.value"
-				/>
-                <span class="form-vertical-spacer"></span>
-                <InputComponent
-					id="item-total-input"
-					name="item-total-input"
-					placeholder="Total (0.00)"
-                    customClass="medium"
-					:value="newItem.total"
-                    @input="newItem.total = $event.target.value"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <InputComponent
 					id="item-desc-input"
 					name="item-desc-input"
 					placeholder="Description"
-                    customClass="default"
+                    customClass="wider"
 					:value="newItem.description"
                     @input="newItem.description = $event.target.value"
 				/>
@@ -45,7 +39,7 @@
                 <SubmitButtonComponent
                     :title="'CREATE'"
                     customClass="default"
-                    @onAction="goCreateGroup"
+                    @onAction="goCreateTeam"
                 />
                 <span class="form-horiz-spacer"></span>
                 <SubmitButtonComponent
@@ -55,14 +49,11 @@
                 />
             </div>
 
-            <!-- SECTION: List items -->
-            <div class="module-group-list">
-                <div
-                    class="module-group-list-item"
-                    v-for="item in outlines"
-                    :key="item.id"
-                >
-                    <p>{{ item.name }}</p>
+            <!-- SECTION: Edit Item -->
+            <div v-else="view == 'edit'" class="organization-details-container">
+                <div class="">
+                    <h2>{{ organization.name }}</h2>
+                    <p>{{ organization.description }}</p>
                 </div>
             </div>
 
@@ -82,7 +73,7 @@ import { outlineStore } from '../stores/outline'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 
 export default defineComponent({
-    name: 'OutlinesView',
+    name: 'OrganizationsView',
     mixins: [ModuleListingMixin],
     components: {
     },
@@ -94,10 +85,17 @@ export default defineComponent({
                 total: null,
                 description: null
             },
-            view: 'list'
+            view: 'edit'
         }
     },
     computed: {
+        organization() {
+            return {
+                id: 1,
+                name: 'Glampings',
+                description: 'This is the organization description'
+            }
+        },
         outlines() {
 			return outlineStore().outlines
 		},
@@ -105,8 +103,8 @@ export default defineComponent({
     watch: {
     },
     methods: {
-        goCreateGroup() {
-            const store = outlineStore()
+        goCreateTeam() {
+            const store = orgaizationStore()
             store.create(this.newItem)
         },
         loadOutlines() {
@@ -119,15 +117,15 @@ export default defineComponent({
         // Perform any necessary setup or initialization here
     },
     mounted() {
-        console.log('mounted')
-        console.log(this.$route.query)
         if ( this.$route.query.action ) {
             const action = this.$route.query.action
             if ( action == 'new' ) {
                 this.view = 'create'
+            } else {
+                this.view = 'edit'
             }
         }
-        this.loadOutlines()
+        // this.loadOutlines()
     },
 })
 </script>

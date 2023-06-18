@@ -1,7 +1,7 @@
 import axios from '../plugins/axios'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
-export const usePaginationStore = defineStore({
+export const paginationStore = defineStore({
     id: 'pagination',
     persist: true,
     state: () => ({
