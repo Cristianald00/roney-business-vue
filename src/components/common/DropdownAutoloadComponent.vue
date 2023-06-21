@@ -327,7 +327,7 @@ export default {
 				}
 			}
 			// Always emmit changed value
-			this.$emit('input', value)
+			this.$emit('value', value)
 		}
 	},
 	watch: {
@@ -375,6 +375,7 @@ export default {
 	display: inline-block;
 	max-width: 100%;
 	margin: auto;
+	background: white;
 
 	.dropdown-input {
 		position: relative;

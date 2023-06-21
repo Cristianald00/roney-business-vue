@@ -4,7 +4,9 @@ import authorizationMiddleware from '../middleware/authorization'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import ExpensesView from '../views/ExpensesView.vue'
+import OutlinesView from '../views/OutlinesView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import OrganizationsView from '../views/OrganizationsView.vue'
 
 const routes = [
     {
@@ -30,8 +32,8 @@ const routes = [
         name: 'home',
         component: HomeView,
         meta: {
-            allowsPublicAccess: true,
-            requiresAuth: false
+            allowsPublicAccess: false,
+            requiresAuth: true
         }
     },
     {
@@ -44,12 +46,30 @@ const routes = [
         }
     },
     {
+        path: '/organizations',
+        name: 'organizations',
+        component: OrganizationsView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/outlines',
+        name: 'outlines',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+    {
         path: '/register',
         name: 'register',
         component: RegisterView,
         meta: {
             allowsPublicAccess: true,
-            requiresAuth: true
+            requiresAuth: false
         }
     }
 ];

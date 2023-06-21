@@ -5,10 +5,10 @@
         </div>
         <nav class="header-body">
             <div class="header-nav">
-                <router-link class="header-nav-item" to="/"><font-awesome-icon icon="fa-solid fa-gauge" /><span>HOME</span></router-link>
-                <router-link class="header-nav-item" to="/about"><font-awesome-icon icon="fa-solid fa-receipt" /><span>EXPENSES</span></router-link>
+                <router-link class="header-nav-item" to="/home"><font-awesome-icon icon="fa-solid fa-gauge" /><span>HOME</span></router-link>
+                <router-link v-if="organization" class="header-nav-item" to="/expenses"><font-awesome-icon icon="fa-solid fa-receipt" /><span>EXPENSES</span></router-link>
+                <router-link v-if="organization" class="header-nav-item" to="/outlines"><font-awesome-icon icon="fa-solid fa-sitemap" /><span>OUTLINES</span></router-link>
                 <router-link class="header-nav-item" to="/about"><font-awesome-icon icon="fa-solid fa-gauge" /><span>ABOUT</span></router-link>
-                <a class="header-nav-item" @click="goLogout"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span>LOG OUT</span></a>
             </div>
         </nav>
         <div class="header-footer">
@@ -23,6 +23,13 @@ import { userStore } from '../../stores/user'
 
 export default defineComponent({
     name: 'HeaderCore',
+    props: {
+		organization: {
+			type: Object,
+			required: true,
+			default: null
+		}
+	},
     data() {
         return {
             // Define data properties
@@ -35,10 +42,6 @@ export default defineComponent({
     watch: {
     },
     methods: {
-        goLogout() {
-            const store = userStore()
-            store.logout()
-        }
     },
     beforeMount() {
         // Lifecycle hook: beforeMount

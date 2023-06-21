@@ -14,8 +14,8 @@ export default {
 				name: '',
 				description: '',
 				user: '',
-				total: 0,
-				date: ''
+				total: null,
+				date: new Date().toISOString().slice(0, 10)
 			},
 			// Table Data
 			isTableLoading: false,
