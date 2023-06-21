@@ -87,7 +87,7 @@ export const outlineStore = defineStore({
             let outline = outlineData.outline
 
             // Include into existing outlines
-            const outlines = this.outlines
+            let outlines = this.outlines
             if ( !outlines ) {
                 outlines = []
             }

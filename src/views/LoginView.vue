@@ -27,7 +27,7 @@ export default defineComponent({
         return {
             error: '',
             username: '',
-            password: '',
+            password: ''
         }
     },
     beforeMount() {
