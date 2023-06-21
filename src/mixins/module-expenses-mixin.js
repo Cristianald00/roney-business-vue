@@ -28,7 +28,6 @@ export default defineComponent ({
 					value: 'email',
 					visible: true
 				},
-
 				{
 					id: 4,
 					text: 'User',
@@ -39,6 +38,14 @@ export default defineComponent ({
 				},
 				{
 					id: 5,
+					text: 'Group',
+					align: 'left',
+					sortable: false,
+					value: 'group',
+					visible: true
+				},
+				{
+					id: 6,
 					text: 'Total',
 					align: 'right',
 					sortable: false,
@@ -46,7 +53,7 @@ export default defineComponent ({
 					visible: true
 				},
 				{
-					id: 6,
+					id: 7,
 					text: '.',
 					align: 'right',
 					sortable: false,

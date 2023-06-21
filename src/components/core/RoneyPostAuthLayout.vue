@@ -1,6 +1,6 @@
 <template>
     <div class="roney-post-layout-container">
-        <HeaderCore />
+        <HeaderCore :organization="organization" />
 
         <div class="roney-post-layout-right">
             <div class="profile-menu" v-if="user" >

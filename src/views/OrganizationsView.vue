@@ -39,7 +39,7 @@
                 <SubmitButtonComponent
                     :title="'CREATE'"
                     customClass="default"
-                    @onAction="goCreateTeam"
+                    @onAction="goCreateOrganization"
                 />
                 <span class="form-horiz-spacer"></span>
                 <SubmitButtonComponent
@@ -50,15 +50,45 @@
             </div>
 
             <!-- SECTION: Edit Item -->
-            <div v-else="view == 'edit'" class="organization-details-container">
+            <div v-else="view == 'edit'" class="module-group-details">
                 <div class="" v-if="organization">
                     <h1>{{ organization.name }} <span style="font-size: 13px;">current</span></h1>
                     <p>{{ organization.description }}</p>
                 </div>
+                <br><br>
+                <div class="">
+                    <h3>Users</h3>
+                    <br>
+                    <div class="">
+                        <InputComponent
+        					id="item-name-input"
+        					name="item-name-input"
+        					placeholder="Type User Email"
+                            customClass="medium"
+        					:value="newUserEmail"
+                            @input="newUserEmail = $event.target.value"
+        				/>
+                        &nbsp;
+                        <SubmitButtonComponent
+                            :title="'Add User'"
+                            customClass="default"
+                            @onAction="goAddUser"
+                        />
+                    </div><br>
+                    <div v-if="organizationUsers && organizationUsers.length > 0" class="">
+                        <div
+                            v-for="(user, index) in organizationUsers"
+    						:key="index + 'user'"
+                            class="module-group-details-item"
+                        >
+                            - {{ user.name }}&nbsp;<span><font-awesome-icon @click="goRemoveUser(user.id)" icon="fa-solid fa-trash" /></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- SECTION: List items -->
-            <br><br>
+            <br><br><br>
             <div class="module-group-list">
                 <h3>Teams</h3>
                 <div
@@ -100,10 +130,14 @@ export default defineComponent({
                 total: null,
                 description: null
             },
+            newUserEmail: null,
             view: 'edit'
         }
     },
     computed: {
+        organizationUsers() {
+            return organizationStore().organizationUsers
+        },
         organization() {
             return organizationStore().organization
         },
@@ -114,7 +148,13 @@ export default defineComponent({
     watch: {
     },
     methods: {
-        goCreateTeam() {
+        goAddUser() {
+            const store = organizationStore()
+            store.addUser(this.organization.id, this.newUserEmail)
+            // Reset
+            this.newUserEmail = null
+        },
+        goCreateOrganization() {
             const store = organizationStore()
             store.create(this.newItem)
             // Reset
@@ -128,6 +168,12 @@ export default defineComponent({
             const store = organizationStore()
             await store.makeCurrent(id)
         },
+        goRemoveUser(userId) {
+            const store = organizationStore()
+            store.removeUser(this.organization.id, userId)
+            // Reset
+            this.newUserEmail = null
+        },
         loadOrganization() {
             const store = organizationStore()
             const theUserStore = userStore()
@@ -136,7 +182,9 @@ export default defineComponent({
         },
         loadOrganizations() {
             const store = organizationStore()
-            store.list()
+            store.list().then( () => {
+                store.listOrganizationUsers(this.organization.id)
+            })
         }
     },
     beforeMount() {

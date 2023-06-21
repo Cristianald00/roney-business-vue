@@ -7,10 +7,12 @@ export const organizationStore = defineStore({
     persist: true,
     state: () => ({
         organization: null,
-        organizations: []
+        organizations: [],
+        organizationUsers: []
     }),
 
     actions: {
+
         /**
         * Show organization
         */
@@ -75,6 +77,48 @@ export const organizationStore = defineStore({
                 organization: organization
             })
         },
+
+
+        // ORGANIZATION USERS apis
+
+        /**
+        * List Organization Users
+        */
+        async listOrganizationUsers(id) {
+            const organizationData = await apiListOrganizationUsers(id)
+            const organizationUsers = organizationData['organizationUsers']
+
+            // Update states
+            this.$patch({
+                organizationUsers: organizationUsers
+            })
+        },
+
+        /**
+        * Add user to organization
+        */
+        async addUser(orgId, email) {
+            const organizationData = await apiOrganizationAddUser(orgId, email)
+            const organizationUsers = organizationData['organizationUsers']
+
+            // Update states
+            this.$patch({
+                organizationUsers: organizationUsers
+            })
+        },
+
+        /**
+        * Remove user from organization
+        */
+        async removeUser(orgId, userId) {
+            const organizationData = await apiOrganizationRemoveUser(orgId, userId)
+            const organizationUsers = organizationData['organizationUsers']
+
+            // Update states
+            this.$patch({
+                organizationUsers: organizationUsers
+            })
+        },
     },
 })
 
@@ -123,6 +167,46 @@ function apiOrganizationCreate(payload) {
 
 function apiOrganizationMakeCurrent(id) {
     return axios.get('/api/organizations/makeCurrent/' + id)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error creating team');
+    });
+}
+
+// ORGANIZATION USERS apis
+
+function apiListOrganizationUsers(organization_id) {
+    return axios.get('/api/organizationUsers/' + organization_id)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error listing teams');
+    });
+}
+
+function apiOrganizationAddUser(orgId, email) {
+    return axios.post('/api/organizationUsers/' + orgId, {
+        email: email
+    })
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error creating team');
+    });
+}
+
+function apiOrganizationRemoveUser(orgId, userId) {
+    return axios.delete('/api/organizationUsers/' + orgId + '/user/' + userId)
     .then( (response) => {
         if (response.status === 200) {
             return response.data.data

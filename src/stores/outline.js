@@ -12,6 +12,21 @@ export const outlineStore = defineStore({
 
     actions: {
         /**
+        * Show organization
+        */
+        async show(id) {
+            if (id) {
+                const outlineData = await apiOutlineShow(id)
+                let outline = outlineData.outline
+
+                // Update states
+                this.$patch({
+                    outline: outline
+                })
+            }
+        },
+
+        /**
         * List outlines
         */
         async list() {
@@ -36,6 +51,34 @@ export const outlineStore = defineStore({
                 outline: outline
             })
         },
+
+        /**
+        * Create outlines
+        */
+        async update(id, payload) {
+            const outlineData = await apiOutlineUpdate(id, payload)
+            let outlines = this.outlines
+            let outline = outlineData.outline
+
+            // Update outlines
+            if ( outlines ) {
+                outlines.forEach( (item) => {
+                    // Set is_selected putline as main outline state
+                    if ( item.id == outline.id ) {
+                        outline = item
+                    }
+                })
+            } else {
+                outlines = []
+            }
+
+            // Update states
+            this.$patch({
+                outline: outline,
+                outlines: outlines
+            })
+        },
+
         /**
         * Create outlines
         */
@@ -66,6 +109,18 @@ export const outlineStore = defineStore({
 * Api Requests
 */
 
+function apiOutlineShow(id) {
+    return axios.get('/api/outlines/' + id)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error showing outline');
+    });
+}
+
 function apiOutlineList() {
     const page = 1
     return axios.get('/api/outlines', {
@@ -77,7 +132,19 @@ function apiOutlineList() {
         }
     })
     .catch((error) => {
-        throw new Error('Error registering');
+        throw new Error('Error listing outlines');
+    });
+}
+
+function apiOutlineUpdate(id, payload) {
+    return axios.put('/api/outlines/' + id, payload)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error updating outline');
     });
 }
 
@@ -89,6 +156,6 @@ function apiOutlineCreate(payload) {
         }
     })
     .catch((error) => {
-        throw new Error('Error registering');
+        throw new Error('Error creating outline');
     });
 }

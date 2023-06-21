@@ -70,7 +70,7 @@
                     @input="newItem.total = $event.target.value"
 				/>
                 <span class="form-horiz-spacer"></span>
-                <span>{{ convertNumberToCurrency(newItem.total) }}</span>
+                <span>{{ convertNumberToCurrency(newItem.total ? newItem.total : 0) }}</span>
                 <span class="form-vertical-spacer"></span>
                 <InputComponent
 					id="item-desc-input"
@@ -126,6 +126,13 @@
 						<td style="font-weight: 500;">{{ item.name }}</td>
                         <td>{{ item.description }}</td>
 						<td>{{ item.user_name }}</td>
+                        <td class="group-item-colors-td">
+                            <span
+                                :class="'group-item-color group-item-color-' + getChildOutlineColor(item.child_outline_id)"
+                            >
+                        </span>&nbsp;
+                            {{ ( item.child_outline_id ? getChildOutlineName(item.child_outline_id) : '' ) }}
+                        </td>
                         <td class="cell-type-currency">{{ convertNumberToCurrency(item.total) }}</td>
                         <td class="cell-type-menu"><font-awesome-icon icon="fa-solid fa-caret-down" /></td>
 					</tr>
@@ -170,7 +177,7 @@
             <div v-if="outline" class="module-summary">
                 <h2>{{ outline.name }}</h2><br><br>
                 <span class="summary-label">Total:</span>
-                <span class="summary-value">{{ convertNumberToCurrency(outline.total) }}</span>
+                <span class="summary-value">{{ convertNumberToCurrency(outline.total ? outline.total: 0) }}</span>
                 <span class="summary-label">Total this Month: {{ pageTotal }}</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.current_month_total) }}</span>
             </div>
@@ -198,6 +205,7 @@ export default defineComponent({
             // Define data properties
             name: '',
             isDisplayCreateForm: false,
+            outlineNamesArray: [],
             users: [
                 {
                     id: 1,
@@ -252,6 +260,54 @@ export default defineComponent({
 		}
     },
     methods: {
+        getChildOutlineName(child_outline_id) {
+            let name = ''
+            let nameFound = false
+            this.outlineNamesArray.forEach( (item, i) => {
+                if ( item.id == child_outline_id ) {
+                    name = item.name
+                    nameFound = true
+                }
+            })
+            // If name not found add it to array for later use
+            if ( !nameFound ) {
+                this.outlines.forEach( (outline, i) => {
+                    if ( outline.id == child_outline_id ) {
+                        name = outline.name
+                        this.outlineNamesArray.push({
+                            id: outline.id,
+                            name: outline.name,
+                            color: outline.color
+                        })
+                    }
+                })
+            }
+            return name;
+        },
+        getChildOutlineColor(child_outline_id) {
+            let color = ''
+            let colorFound = false
+            this.outlineNamesArray.forEach( (item, i) => {
+                if ( item.id == child_outline_id ) {
+                    color = item.color
+                    colorFound = true
+                }
+            })
+            // If name not found add it to array for later use
+            if ( !colorFound ) {
+                this.outlines.forEach( (outline, i) => {
+                    if ( outline.id == child_outline_id ) {
+                        color = outline.color
+                        this.outlineNamesArray.push({
+                            id: outline.id,
+                            name: outline.name,
+                            color: outline.color
+                        })
+                    }
+                })
+            }
+            return color;
+        },
         goChangePage(payload) {
             console.log('clicked');
             const paginationPayload = payload
@@ -282,14 +338,16 @@ export default defineComponent({
         				name: '',
         				description: '',
         				user: '',
-        				total: 0,
+        				total: null,
         				date: new Date().toISOString().slice(0, 10)
         			}
                 }
             })
         },
         goManageGroup() {
-            // console.log('Manage group')
+            if ( this.outline ) {
+                this.$router.push('/outlines?action=edit&id=' + this.outline.id)
+            }
         },
         loadExpenses(outlineId, paginationPayload = null) {
             const store = expenseStore()
@@ -341,5 +399,47 @@ export default defineComponent({
     button {
         margin-top: 2em;
     }
+}
+
+// GROUP ITEMS COLORS
+.group-item-colors-td {
+    white-space: nowrap;
+}
+.group-item-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+.group-item-color-1abc9c {
+    background: #1abc9c;
+}
+.group-item-color-2ecc71 {
+    background: #2ecc71;
+}
+.group-item-color-3498db {
+    background: #3498db;
+}
+.group-item-color-9b59b6 {
+    background: #9b59b6;
+}
+.group-item-color-34495e {
+    background: #34495e;
+}
+.group-item-color-f1c40f {
+    background: #f1c40f;
+}
+.group-item-color-e67e22 {
+    background: #e67e22;
+}
+.group-item-color-e74c3c {
+    background: #e74c3c;
+}
+.group-item-color-95a5a6 {
+    background: #95a5a6;
+}
+.group-item-color-2c3e50 {
+    background: #2c3e50;
 }
 </style>
