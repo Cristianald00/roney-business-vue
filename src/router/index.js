@@ -6,6 +6,7 @@ import LoginView from '../views/LoginView.vue'
 import ExpensesView from '../views/ExpensesView.vue'
 import OutlinesView from '../views/OutlinesView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import TimesheetsView from '../views/TimesheetsView.vue'
 import OrganizationsView from '../views/OrganizationsView.vue'
 
 const routes = [
@@ -70,6 +71,15 @@ const routes = [
         meta: {
             allowsPublicAccess: true,
             requiresAuth: false
+        }
+    },
+    {
+        path: '/timesheets',
+        name: 'timesheets',
+        component: TimesheetsView,
+        meta: {
+            allowsPublicAccess: true,
+            requiresAuth: true
         }
     }
 ];

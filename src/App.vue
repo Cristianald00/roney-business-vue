@@ -92,4 +92,12 @@ html, body {
 	margin: 0px;
     box-sizing: border-box;
 }
+
+.row-block {
+
+}
+
+.column-block {
+    display: inline-block;
+}
 </style>

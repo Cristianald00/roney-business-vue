@@ -28,6 +28,10 @@
                     <h3>Expenses</h3>
                     <font-awesome-icon icon="fa-solid fa-receipt" />
                 </div>
+                <div class="dashboard-card" @click="goViewTimesheets">
+                    <h3>Timesheets</h3>
+                    <font-awesome-icon icon="fa-solid fa-calendar" />
+                </div>
             </div>
 
         </div>
@@ -65,6 +69,9 @@ export default defineComponent({
         },
         goViewExpenses() {
             this.$router.push('/expenses')
+        },
+        goViewTimesheets() {
+            this.$router.push('/timesheets')
         }
     },
     beforeMount() {
@@ -89,6 +96,7 @@ export default defineComponent({
     display: inline-block;
     width: 300px;
     padding: 20px 18px 30px;
+    margin: 10px;
     text-align: center;
     background: white;
     border-radius: 10px;
