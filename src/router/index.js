@@ -10,6 +10,16 @@ import TimesheetsView from '../views/TimesheetsView.vue'
 import OrganizationsView from '../views/OrganizationsView.vue'
 
 const routes = [
+    // ................. INTERNAL .................
+    {
+        path: '/',
+        name: '',
+        component: HomeView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
     {
         path: '/about',
         name: 'about',

@@ -6,32 +6,62 @@
 
             <!-- SECTION: Create item -->
             <div v-if="view == 'create'" class="module-group-create-form">
-                <InputComponent
-					id="item-name-input"
-					name="item-name-input"
-					placeholder="Group Name"
-                    customClass="medium"
-					:value="newItem.name"
-                    @input="newItem.name = $event.target.value"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <InputComponent
-					id="item-desc-input"
-					name="item-desc-input"
-					placeholder="Description"
-                    customClass="wider"
-					:value="newItem.description"
-                    @input="newItem.description = $event.target.value"
-				/>
-                <span class="form-horiz-spacer"></span>
-                <DropdownAutoloadComponent
-    				:options="colors"
-    				:disabled="false"
-    				placeholder="Select Color"
-                    :value="newItem.color"
-                    @onValueChanged="newItem.color = $event"
-    			/>&nbsp;
-                <span v-if="newItem.color" :class="'dropdown-color dropdown-color-' + newItem.color.id"></span>
+                <div class="column-block">
+                    <LabelComponent
+    					title="Group Name"
+                        customClass="default"
+    				/><br>
+                    <InputComponent
+    					id="item-name-input"
+    					name="item-name-input"
+    					placeholder="Group Name"
+                        customClass="medium"
+    					:value="newItem.name"
+                        @input="newItem.name = $event.target.value"
+    				/>
+                </div>
+                <div class="column-block" v-if="moduleType == 'timesheet'">
+                    <LabelComponent
+    					title="Employee"
+                        customClass="default"
+    				/><br>
+                    <DropdownAutoloadComponent
+        				:options="organizationUsers"
+        				:disabled="false"
+        				placeholder="Select Employee"
+                        :value="newItem.assignee_id"
+                        @onValueChanged="newItem.assignee_id = $event"
+        			/>
+                </div>
+                <div class="column-block">
+                    <LabelComponent
+    					title="Custom Color"
+                        customClass="default"
+    				/><br>
+                    <DropdownAutoloadComponent
+        				:options="colors"
+        				:disabled="false"
+        				placeholder="Select Color"
+                        :value="newItem.color"
+                        @onValueChanged="newItem.color = $event"
+        			/>
+                    &nbsp;<span v-if="newItem.color" :class="'dropdown-color dropdown-color-' + newItem.color.id"></span>
+                </div>
+                <div class="column-block">
+                    <LabelComponent
+    					title="Description"
+                        customClass="default"
+    				/><br>
+                    <InputComponent
+    					id="item-desc-input"
+    					name="item-desc-input"
+    					placeholder="Description"
+                        customClass="wider"
+    					:value="newItem.description"
+                        @input="newItem.description = $event.target.value"
+    				/>
+                </div>
+                <span class="form-vertical-spacer"></span>
                 <span class="form-vertical-spacer"></span>
                 <SubmitButtonComponent
                     :title="'CREATE'"
@@ -110,6 +140,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { outlineStore } from '../stores/outline'
+import { organizationStore } from '../stores/organization'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 
 export default defineComponent({
@@ -119,6 +150,7 @@ export default defineComponent({
     },
     data() {
         return {
+            moduleType: null,
             newItem: {
                 name: null,
                 date: null,
@@ -148,6 +180,9 @@ export default defineComponent({
         }
     },
     computed: {
+        organizationUsers() {
+            return organizationStore().organizationUsers
+        },
         outline() {
 			return outlineStore().outline
 		},
@@ -156,6 +191,14 @@ export default defineComponent({
 		},
     },
     watch: {
+        ['newItem.assignee_id']: {
+            handler: function (assignee) {
+                if (assignee && assignee.name) {
+                    this.newItem.name = assignee.name
+                }
+            },
+            deep: true
+        },
         outline: {
 			handler: function () {
                 let parents = []
@@ -172,7 +215,7 @@ export default defineComponent({
                 })
 			},
 			deep: true
-		},
+		}
     },
     methods: {
         async goAddParent() {
@@ -201,6 +244,7 @@ export default defineComponent({
             const store = outlineStore()
             const outline = this.newItem
             outline.color = this.newItem.color.id
+            outline.assignee_id = this.newItem.assignee_id.id
             store.create(outline)
         },
         async goRemoveParent(id) {
@@ -255,10 +299,16 @@ export default defineComponent({
         // Display applicable view
         let view = 'edit'
         const action = this.$route.query.action
+        const moduleType = this.$route.query.type
+        // Define action
         if ( action ) {
             if ( action == 'new' ) {
                 view= 'create'
             }
+        }
+        // Define module type
+        if ( moduleType ) {
+            this.moduleType = moduleType
         }
         this.view = view
 

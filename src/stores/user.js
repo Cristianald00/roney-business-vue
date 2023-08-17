@@ -7,7 +7,8 @@ export const userStore = defineStore({
     persist: true,
     state: () => ({
         user: null,
-        access_token: null
+        access_token: null,
+        role: null
     }),
     getters: {
         doubleCount: (state) => state.counter * 2
@@ -51,6 +52,20 @@ export const userStore = defineStore({
             })
             // Redirect to Dashboard
             router.replace({ path: '/home' })
+        },
+
+        /**
+        * Attempt to login a user
+        */
+        async saveRole(role = 4) {
+            // Roles:
+            // - 1: Superadmin
+            // - 2: Admin
+            // - 3: Subadmin
+            // - 4: Employee
+            this.$patch({
+                role: role
+            })
         },
     },
 })

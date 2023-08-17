@@ -53,7 +53,7 @@ export const outlineStore = defineStore({
         },
 
         /**
-        * Create outlines
+        * Update outlines
         */
         async update(id, payload) {
             const outlineData = await apiOutlineUpdate(id, payload)

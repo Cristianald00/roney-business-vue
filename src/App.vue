@@ -94,10 +94,12 @@ html, body {
 }
 
 .row-block {
-
+    display: block;
+    margin-bottom: 20px;
 }
 
 .column-block {
     display: inline-block;
+    margin-right: 20px;
 }
 </style>

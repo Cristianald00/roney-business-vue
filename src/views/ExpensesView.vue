@@ -178,7 +178,7 @@
                 <h2>{{ outline.name }}</h2><br><br>
                 <span class="summary-label">Total:</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.total ? outline.total: 0) }}</span>
-                <span class="summary-label">Total this Month: {{ pageTotal }}</span>
+                <span class="summary-label">Total this Month:</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.current_month_total) }}</span>
             </div>
         </div>

@@ -2,7 +2,8 @@
     <div class="module-view-container">
         <!-- SECTION: Header -->
         <GroupsNavigationComponent
-            :groups="outlines"
+            :role="role"
+            :groups="visibleOutlines"
             @onClicked="onNavGroupClicked"
             @onClickedAddNew="goCreateNewGroup"
         />
@@ -49,7 +50,6 @@
                         @input="newItem.shift_date = $event.target.value"
                     />
                 </div>
-                <span class="form-horiz-spacer"></span>
                 <div class="column-block">
                     <LabelComponent
     					title="Día de Semana"
@@ -64,7 +64,6 @@
                         @input="newItem.week_date = $event.target.value"
     				/>
                 </div>
-                <span class="form-horiz-spacer"></span>
                 <div class="column-block">
                     <LabelComponent
     					title="Hora de Inicio"
@@ -79,7 +78,6 @@
                         @input="newItem.start_time = $event.target.value"
                     />
                 </div>
-                <span class="form-horiz-spacer"></span>
                 <div class="column-block">
                     <LabelComponent
     					title="Hora de Salida"
@@ -109,7 +107,6 @@
                         @input="newItem.total_hours = $event.target.value"
     				/>
                 </div>
-                <span class="form-horiz-spacer"></span>
                 <div class="column-block">
                     <LabelComponent
     					title="Pago Hora"
@@ -124,7 +121,6 @@
                         @input="newItem.hour_pay = $event.target.value"
     				/>
                 </div>
-                <span class="form-horiz-spacer"></span>
                 <div class="column-block">
                     <LabelComponent
     					title="Pago Total"
@@ -139,8 +135,6 @@
                         @input="newItem.total_pay = $event.target.value"
     				/>
                 </div>
-                <span class="form-horiz-spacer"></span>
-
                 <div class="column-block">
                     <LabelComponent
     					title="Pago Total"
@@ -252,7 +246,7 @@
                 <h2>{{ outline.name }}</h2><br><br>
                 <span class="summary-label">Total:</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.total ? outline.total: 0) }}</span>
-                <span class="summary-label">Total this Month: {{ pageTotal }}</span>
+                <span class="summary-label">Total this Month:</span>
                 <span class="summary-value">{{ convertNumberToCurrency(outline.current_month_total) }}</span>
             </div>
         </div>
@@ -262,9 +256,11 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
+import { userStore } from '../stores/user'
 import { timesheetStore } from '../stores/timesheet'
 import { outlineStore } from '../stores/outline'
 import { paginationStore } from '../stores/pagination'
+import { organizationStore } from '../stores/organization'
 import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleTimesheetsMixin from '@/mixins/module-timesheets-mixin'
@@ -276,9 +272,8 @@ export default defineComponent({
     },
     data() {
         return {
-            // Define data properties
-            name: '',
             isDisplayCreateForm: false,
+            name: '',
             outlineNamesArray: [],
             users: [
                 {
@@ -293,14 +288,28 @@ export default defineComponent({
         }
     },
     computed: {
-        timesheets() {
-			return timesheetStore().timesheets
-		},
+        currentUser() {
+            return userStore().user
+        },
+        organizationUsers() {
+            return organizationStore().organizationUsers
+        },
         outline() {
 			return outlineStore().outline
 		},
         outlines() {
 			return outlineStore().outlines
+		},
+        visibleOutlines() {
+			const outlines = outlineStore().outlines
+            const visibleOutlines = []
+            outlines.forEach( (outline, i) => {
+                // Display all timesheets for admins, and only respective timesheet for eployee role
+                if (this.role <= 2 || this.currentUser.id == outline.assignee_id) {
+                    visibleOutlines.push(outline)
+                }
+            })
+            return visibleOutlines
 		},
         orderBy() {
 			return paginationStore().orderBy
@@ -316,10 +325,16 @@ export default defineComponent({
 		},
         pageTotal() {
 			return paginationStore().pageTotal
+		},
+        role() {
+            return userStore().role
+        },
+        timesheets() {
+			return timesheetStore().timesheets
 		}
     },
     watch: {
-        outlines(newOutlinesVal) {
+        visibleOutlines(newOutlinesVal) {
             newOutlinesVal.forEach( (item) => {
                 if ( item.is_selected == true ) {
                     this.loadTimesheets(item.id)
@@ -435,7 +450,6 @@ export default defineComponent({
             }
         },
         goChangePage(payload) {
-            console.log('clicked');
             const paginationPayload = payload
             const firstItem = this.timesheets[0]
             const latestItem = this.timesheets[this.timesheets.length - 1]
@@ -447,7 +461,7 @@ export default defineComponent({
             this.loadTimesheets( this.outline.id, paginationPayload)
         },
         goCreateNewGroup() {
-            this.$router.push('/outlines?action=new')
+            this.$router.push('/outlines?action=new&type=timesheet')
         },
         goCreateTimesheet() {
             const store = timesheetStore()
@@ -490,7 +504,7 @@ export default defineComponent({
         },
         onNavGroupClicked(group) {
             const store = outlineStore()
-            this.outlines.forEach( (item) => {
+            this.visibleOutlines.forEach( (item) => {
                 // Set is_selected to false for all other items
                 if ( item !== group ) {
                     item.is_selected = false
@@ -510,7 +524,7 @@ export default defineComponent({
     },
     mounted() {
         this.loadOutlines()
-    },
+    }
 })
 </script>
 

@@ -18,8 +18,11 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { userStore } from '../stores/user'
+import { organizationStore } from '../stores/organization'
+import AuthenticationMixin from '@/mixins/authentication-mixin'
 
 export default defineComponent({
+    mixins: [AuthenticationMixin],
     components: {
         // Import and register any components you want to use
     },
@@ -62,8 +65,11 @@ export default defineComponent({
             // Method for handling the login action
             const store = userStore()
             store.login(this.username, this.password)
-            .then(() => {
+            .then( async () => {
                 // Perform any actions after successful login
+                // Calculate user role
+                this.calculateSessionRole()
+                // Reset fields
                 this.username = ''
                 this.password = ''
             })

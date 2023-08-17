@@ -1,7 +1,7 @@
 <template>
     <div class="footer-container">
         <footer class="footer-body">
-            &copy; Awesome Company
+            All rights reserved, 2023 - Roney Technologies Inc.
         </footer>
     </div>
 </template>

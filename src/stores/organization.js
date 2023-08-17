@@ -42,6 +42,33 @@ export const organizationStore = defineStore({
         },
 
         /**
+        * Update outline
+        */
+        async update(id, payload) {
+            const organizationData = await apiOrganizationUpdate(id, payload)
+            let organizations = this.organizations
+            let organization = organizationData.organization
+
+            // Update outlines
+            if ( organizations ) {
+                organizations.forEach( (item) => {
+                    // Set is_selected organization as main orgnanization state
+                    if ( item.id == organization.id ) {
+                        organization = item
+                    }
+                })
+            } else {
+                organizations = []
+            }
+
+            // Update states
+            this.$patch({
+                organization: organization,
+                organizations: organizations
+            })
+        },
+
+        /**
         * Create organizations
         */
         async create(payload) {
@@ -150,6 +177,18 @@ function apiOrganizationList() {
     })
     .catch((error) => {
         throw new Error('Error listing teams');
+    });
+}
+
+function apiOrganizationUpdate(id, payload) {
+    return axios.put('/api/organizations/' + id, payload)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error updating organization');
     });
 }
 

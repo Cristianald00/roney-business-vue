@@ -19,8 +19,8 @@
                                 @onValueChanged="goSwitchOrganization"
                 			/>
                         </li>
-                        <li @click="goViewTeam" v-if="organization">{{ organization.name }}&nbsp;&nbsp;<font-awesome-icon icon="fa-solid fa-pen" /></li>
                         <li @click="goNewTeam">New Team&nbsp;&nbsp;<font-awesome-icon icon="fa-solid fa-plus" /></li>
+                        <li @click="goViewTeam" v-if="organization">{{ organization.name }} (View)</li>
                         <li @click="goLogout">Log out</li>
                     </ul>
                 </div>
