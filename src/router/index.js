@@ -65,6 +65,8 @@ const routes = [
             requiresAuth: true
         }
     },
+
+    // OUTLINES
     {
         path: '/outlines',
         name: 'outlines',
@@ -74,6 +76,25 @@ const routes = [
             requiresAuth: true
         }
     },
+    {
+        path: '/outlines/:action',
+        name: 'outlines.action',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/outlines/:action/:item_id/',
+        name: 'outlines.edit',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+
     {
         path: '/register',
         name: 'register',

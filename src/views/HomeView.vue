@@ -34,6 +34,34 @@
                 </div>
             </div>
 
+            <!-- SECTION: Invitations -->
+            <div v-if="hasOrganizationInvitations" class="">
+                <br><br><br>
+                <div style="margin: 10px;">
+                    <h3><font-awesome-icon icon="fa-solid fa-envelope-open-text" /> Invitations</h3>
+                    <p>You have been invited to join the following teams!</p>
+                </div>
+                <div
+                    v-for="organization in hasOrganizationInvitations"
+                    :key="organization.id"
+                    class="dashboard-card"
+                >
+                    <h4>{{ organization.name }}</h4><br>
+                    <div>
+                        <SubmitButtonComponent
+                            :title="'Accept'"
+                            customClass="default"
+                            @onAction="goManageOrganizationInvitiation(true, organization.id)"
+                        /><br><br>
+                        <SubmitButtonComponent
+                            :title="'Reject'"
+                            customClass="default gray-submit"
+                            @onAction="goManageOrganizationInvitiation(false, organization.id)"
+                        />
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- SECTION: Right -->
@@ -46,6 +74,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { userStore } from '../stores/user'
+import { organizationStore } from '../stores/organization'
 
 export default defineComponent({
     components: {
@@ -59,6 +88,10 @@ export default defineComponent({
         hasOrganization() {
 			return userStore().user && userStore().user.current_organization ? true : false
 		},
+        hasOrganizationInvitations() {
+            const user = userStore().user
+            return user && user.organizations_invitations && user.organizations_invitations.length > 0 ? user.organizations_invitations : null
+        },
         user() {
 			return userStore().user
 		}
@@ -66,6 +99,13 @@ export default defineComponent({
     methods: {
         goCreateNewOrganization() {
             this.$router.push('/organizations?action=new')
+        },
+        goManageOrganizationInvitiation(isAccept, orgId) {
+            const theOrganizationStore = organizationStore()
+            const userId = this.user.id
+            theOrganizationStore.manageOrgInvitiation(isAccept, orgId, userId)
+            // Reset
+            // this.newUserEmail = null
         },
         goViewExpenses() {
             this.$router.push('/expenses')

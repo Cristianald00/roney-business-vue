@@ -6,6 +6,8 @@
 
             <!-- SECTION: Create item -->
             <div v-if="view == 'create'" class="module-group-create-form">
+                <h1>{{ textForCreateOutline }}</h1>
+                <br>
                 <div class="column-block">
                     <LabelComponent
     					title="Group Name"
@@ -79,12 +81,66 @@
             <!-- SECTION: Edit Item -->
             <div v-else="view == 'edit'" class="module-group-details">
                 <div class="" v-if="outline">
-                    <h1>{{ outline.name }} <span style="font-size: 13px;">current</span></h1>
+                    <div class="module-group-details-header">
+                        <h1>{{ outline.name }}</h1>
+                        <div class="">
+                            <LabelComponent
+            					title="Switch Group"
+                                customClass="default"
+            				/><br>
+                            <DropdownAutoloadComponent
+                                :options="outlines"
+                                :disabled="false"
+                                placeholder="Switch Timesheet Group"
+                                :value="outline.id"
+                                @onValueChanged="goSwitchOutline($event)"
+                            />
+                        </div>
+                    </div>
                     <p>{{ outline.description }}</p>
                     <br>
-                    <h3>Parent Groups</h3>
+
+                    <!-- sub SECTION: Outline Configuration -->
+                    <h3>{{ textForConfigurarionsTitle }}</h3>
                     <br>
-                    <p>Specify the groups where you want expenses to be duplicated. For instance, when adding an expense to {{outline.name}}, it can automatically be included in another group. This ensures synchronization between various expense groups."</p>
+                    <div class="">
+                        <div class="row-block">
+                            <LabelComponent
+            					title="Hourly Wage"
+                                customClass="default"
+            				/><br>
+                            <InputComponent
+            					id="item-desc-input"
+            					name="item-desc-input"
+            					placeholder="0.0"
+                                customClass="medium"
+                                type="number"
+            					:value="outline.timesheet_hour_pay"
+                                @input="outline.timesheet_hour_pay = $event.target.value"
+            				/>
+                            &nbsp;<span>{{ convertNumberToCurrency(outline.timesheet_hour_pay ? outline.timesheet_hour_pay : 0) }}</span>
+                        </div>
+                        <SubmitButtonComponent
+                            :title="'Save Settings'"
+                            customClass="default"
+                            @onAction="save"
+                        />
+                    </div><br>
+                    <div v-if="parents.length > 0" class="">
+                        <div
+                            v-for="(parent, index) in parents"
+    						:key="index + 'parent'"
+                            class="module-group-details-item"
+                        >
+                            - {{ parent.name }}&nbsp;<span><font-awesome-icon @click="goRemoveParent(parent.id)" icon="fa-solid fa-trash" /></span>
+                        </div>
+                    </div>
+                    <br>
+
+                    <!-- sub SECTION: Outline Parents -->
+                    <h3>{{ textForParentGroupsTitle }}</h3>
+                    <br>
+                    <p>{{ textForParentGroups }}</p>
                     <br>
                     <div class="">
                         <DropdownAutoloadComponent
@@ -112,21 +168,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- SECTION: List items -->
-            <br><br><br>
-            <div class="module-group-list">
-                <h3>Groups</h3>
-                <div
-                    class="module-group-list-item"
-                    v-for="item in outlines"
-                    :key="item.id"
-                >
-                    <span>{{ item.name }}</span>
-                    <span @click="goSwitchOutline(item.id)" class="switch-to-team-btn">View Group</span>
-                </div>
-            </div>
-
         </div>
 
         <!-- SECTION: Right -->
@@ -140,16 +181,19 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { outlineStore } from '../stores/outline'
+import OutlineMixin from '@/mixins/outline-mixin'
 import { organizationStore } from '../stores/organization'
+import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 
 export default defineComponent({
     name: 'OutlinesView',
-    mixins: [ModuleListingMixin],
+    mixins: [GlobalHelpersMixin, ModuleListingMixin, OutlineMixin],
     components: {
     },
     data() {
         return {
+            currentOutline: null,
             moduleType: null,
             newItem: {
                 name: null,
@@ -206,7 +250,6 @@ export default defineComponent({
                     if (item.id == this.outline.id) {
                         if ( this.outline.parents ) {
                             const parents = Object.values(this.outline.parents)
-                            console.log('parents: ', parents)
                             this.parents = parents
                         } else {
                             this.parents = []
@@ -264,56 +307,71 @@ export default defineComponent({
             await store.update(outline.id, outline)
             await store.show(outline.id)
         },
-        goSwitchOutline(id) {
-            const store = outlineStore()
-            // Reselecet the outline
-            this.outlines.forEach( (item) => {
-                if ( item.id !== id ) {
-                    item.is_selected = false
-                }
-                else {
-                    item.is_selected = true
-                    store.outline = item
-                }
-            })
+        goSwitchOutline(outline) {
+            const id = outline.id ?? null
+            if (id) {
+                const store = outlineStore()
+                // Reselecet the outline
+                this.outlines.forEach( (item) => {
+                    if ( item.id !== id ) {
+                        item.is_selected = false
+                    }
+                    else {
+                        item.is_selected = true
+                        store.outline = item
+                    }
+                })
+            }
         },
-        async loadOutlines() {
+        async loadOutlines(outlineId = null) {
+            const currentOutlineId = outlineId ?? this.outline.id
             const store = outlineStore()
             await store.list()
 
             // Refresh parents
             let parents = []
             this.outlines.forEach( (item, i) => {
-                if (item == this.outline.id) {
-                    parents = this.outline
-                    console.log('parents: ', parents);
+                if ( item.id !== currentOutlineId ) {
+                    item.is_selected = false
+                } else {
+                    item.is_selected = true
+                    store.outline = item
                 }
             })
+        },
+        async save() {
+            const store = outlineStore()
+            const outline = Object.assign({}, this.outline)
+
+            // Update outline
+            await store.update(outline.id, outline)
+            await store.show(outline.id)
         }
     },
     beforeMount() {
-        // Lifecycle hook: beforeMount
-        // Perform any necessary setup or initialization here
     },
     mounted() {
         // Display applicable view
         let view = 'edit'
-        const action = this.$route.query.action
+        const action = this.$route.params.action
+        const asset_id = this.$route.params.item_id
         const moduleType = this.$route.query.type
+
         // Define action
         if ( action ) {
             if ( action == 'new' ) {
                 view= 'create'
             }
         }
+
         // Define module type
         if ( moduleType ) {
             this.moduleType = moduleType
         }
-        this.view = view
 
         // Load data
-        this.loadOutlines()
+        this.view = view
+        this.loadOutlines(asset_id ?? null)
     },
 })
 </script>
@@ -321,15 +379,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/styles/ModuleViewContainer.scss';
 
-.module-group-list {
-    .switch-to-team-btn {
-        margin-left: 1em;
-        cursor: pointer;
-        color: rgb(0, 189, 126);
-    }
-    .switch-to-team-btn:hover {
-        text-decoration: underline;
-    }
+.module-view-center {
+    padding-top: 50px;
 }
 
 // DROPDOWN COLORS

@@ -11,11 +11,11 @@
         <!-- SECTION: Center -->
         <div class="module-view-center">
 
-            <div class="module-group-options">
+            <div class="module-group-options" v-if="role <= 2">
                 <IconButtonComponent
     				icon="fa-solid fa-gear"
-                    title="Manage Group"
-                    helper="Manage Group"
+                    title="Timesheet Settings"
+                    helper="Timesheet Settings"
                     :selected="false"
     				customClass=""
                     @onAction="goManageGroup"
@@ -27,7 +27,7 @@
                 <IconButtonComponent
                     v-if="!isDisplayCreateForm"
     				icon="fa-solid fa-plus"
-                    title="New Timesheet"
+                    title="New Time Entry"
                     :selected="false"
     				customClass=""
                     @onAction="isDisplayCreateForm = true"
@@ -107,7 +107,7 @@
                         @input="newItem.total_hours = $event.target.value"
     				/>
                 </div>
-                <div class="column-block">
+                <div class="column-block" v-if="role <= 2">
                     <LabelComponent
     					title="Pago Hora"
                         customClass="default"
@@ -121,7 +121,7 @@
                         @input="newItem.hour_pay = $event.target.value"
     				/>
                 </div>
-                <div class="column-block">
+                <div class="column-block" v-if="role <= 2">
                     <LabelComponent
     					title="Pago Total"
                         customClass="default"
@@ -232,6 +232,7 @@
             <div v-else-if="timesheets && timesheets.length < 1" class="create-item-alert">
                 <h1>You haven't created any timesheet so far.</h1>
                 <SubmitButtonComponent
+                    v-if="role <= 2"
                     :title="'Create Timesheet'"
                     customClass="default"
                     @onAction="isDisplayCreateForm = true"
@@ -327,13 +328,19 @@ export default defineComponent({
 			return paginationStore().pageTotal
 		},
         role() {
-            return userStore().role
+            return userStore().role ?? 4
         },
         timesheets() {
 			return timesheetStore().timesheets
 		}
     },
     watch: {
+        outline(newVal) {
+            console.log('OUTLINE', newVal)
+            if (this.newItem && newVal.timesheet_hour_pay) {
+                this.newItem.hour_pay = newVal.timesheet_hour_pay
+            }
+        },
         visibleOutlines(newOutlinesVal) {
             newOutlinesVal.forEach( (item) => {
                 if ( item.is_selected == true ) {
@@ -368,10 +375,15 @@ export default defineComponent({
             },
             deep: true
         },
-
         ['newItem.end_time']: {
             handler: function(newEndTime) {
                 this.goCalculateTotalHours();
+            },
+            deep: true
+        },
+        ['newItem.total_hours']: {
+            handler: function(newEndTime) {
+                this.goCalculateTotalPay();
             },
             deep: true
         },
@@ -439,9 +451,6 @@ export default defineComponent({
                 const timeDifference = endTime - startTime
                 const totalHours = timeDifference / (1000 * 60 * 60) // Convert milliseconds to hours
                 this.newItem.total_hours = totalHours
-
-                // Then re calculate total pay
-                this.goCalculateTotalPay()
             }
         },
         goCalculateTotalPay() {
@@ -461,7 +470,12 @@ export default defineComponent({
             this.loadTimesheets( this.outline.id, paginationPayload)
         },
         goCreateNewGroup() {
-            this.$router.push('/outlines?action=new&type=timesheet')
+            this.$router.push({
+                path: '/outlines/new',
+                query: {
+                    type: 'timesheet'
+                }
+            })
         },
         goCreateTimesheet() {
             const store = timesheetStore()
@@ -484,7 +498,12 @@ export default defineComponent({
         },
         goManageGroup() {
             if ( this.outline ) {
-                this.$router.push('/outlines?action=edit&id=' + this.outline.id)
+                this.$router.push({
+                    path: '/outlines/edit/' + this.outline.id,
+                    query: {
+                        type: 'timesheet'
+                    }
+                })
             }
         },
         loadTimesheets(outlineId, paginationPayload = null) {
@@ -501,6 +520,11 @@ export default defineComponent({
         loadOutlines() {
             const store = outlineStore()
             store.list()
+
+            // Initialconfiguration for new item
+            if (this.outline && this.outline.timesheet_hour_pay) {
+                this.newItem.hour_pay = this.outline.timesheet_hour_pay
+            }
         },
         onNavGroupClicked(group) {
             const store = outlineStore()

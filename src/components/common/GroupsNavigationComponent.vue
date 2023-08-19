@@ -28,10 +28,6 @@
 export default {
 	name: 'GroupsNavigationComponent',
 	props: {
-		currentUser: {
-			required: true,
-			type: Object
-		},
 		groups: {
 			required: true,
 			type: Array

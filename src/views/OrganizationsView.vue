@@ -56,6 +56,7 @@
                         <span style="font-size: 13px;">current</span>
                         &nbsp;
                         <font-awesome-icon
+                            v-if="role <= 2"
                             style="font-size: 16px; cursor: pointer;"
                             @click="isDisplayEditOrg = true"
                             icon="fa-solid fa-pen"
@@ -101,7 +102,7 @@
                 <br><br>
 
                 <!-- SECTION: User details -->
-                <div class="">
+                <div class="" v-if="role <= 2">
                     <h3>Users</h3>
                     <br>
                     <div class="">
@@ -133,7 +134,7 @@
             </div>
 
             <!-- SECTION: List items -->
-            <br><br><br>
+            <br><br><br><br>
             <div class="module-group-list">
                 <h3>Teams</h3>
                 <div
@@ -191,6 +192,9 @@ export default defineComponent({
         organizations() {
 			return organizationStore().organizations
 		},
+        role() {
+            return userStore().role ?? 4
+        }
     },
     watch: {
     },
