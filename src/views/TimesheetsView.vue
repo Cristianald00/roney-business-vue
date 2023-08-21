@@ -3,7 +3,7 @@
         <!-- SECTION: Header -->
         <GroupsNavigationComponent
             :role="role"
-            :groups="visibleOutlines"
+            :groups="outlines"
             @onClicked="onNavGroupClicked"
             @onClickedAddNew="goCreateNewGroup"
         />
@@ -144,10 +144,12 @@
                 </div>
 
                 <span class="form-vertical-spacer"></span>
+                <span v-if="error" class="error-message">{{ error }}</span>
                 <span class="form-vertical-spacer"></span>
 
                 <SubmitButtonComponent
                     :title="'CREAR'"
+                    :isLoading="isLoading"
                     customClass="default"
                     @onAction="goCreateTimesheet"
                 />
@@ -215,12 +217,13 @@
 								:pageQty="pageQty"
 								:keyword="keyword"
 								:tableType="tableType"
-								@onPageChange="goChangePage"
+								@onPageChange="onPageChange"
 							/>
 						</td>
 					</tr>
 				</template>
 			</TableComponent>
+
             <div v-else-if="outlines.length < 1" class="create-item-alert">
                 <h1>Hey! You don't have any Timesheets Group yet,<br> start creating one.</h1>
                 <SubmitButtonComponent
@@ -273,7 +276,9 @@ export default defineComponent({
     },
     data() {
         return {
+            error: null,
             isDisplayCreateForm: false,
+            isLoading: false,
             name: '',
             outlineNamesArray: [],
             users: [
@@ -301,17 +306,6 @@ export default defineComponent({
         outlines() {
 			return outlineStore().outlines
 		},
-        visibleOutlines() {
-			const outlines = outlineStore().outlines
-            const visibleOutlines = []
-            outlines.forEach( (outline, i) => {
-                // Display all timesheets for admins, and only respective timesheet for eployee role
-                if (this.role <= 2 || this.currentUser.id == outline.assignee_id) {
-                    visibleOutlines.push(outline)
-                }
-            })
-            return visibleOutlines
-		},
         orderBy() {
 			return paginationStore().orderBy
 		},
@@ -336,17 +330,19 @@ export default defineComponent({
     },
     watch: {
         outline(newVal) {
-            console.log('OUTLINE', newVal)
-            if (this.newItem && newVal.timesheet_hour_pay) {
-                this.newItem.hour_pay = newVal.timesheet_hour_pay
+            if (newVal) {
+                if (this.newItem && newVal && newVal.timesheet_hour_pay) {
+                    this.newItem.hour_pay = newVal.timesheet_hour_pay
+                }
             }
         },
-        visibleOutlines(newOutlinesVal) {
-            newOutlinesVal.forEach( (item) => {
-                if ( item.is_selected == true ) {
-                    this.loadTimesheets(item.id)
+        ['outline.id']: {
+            handler: function (id) {
+                if (id) {
+                    this.loadTimesheets(id)
                 }
-            })
+            },
+            deep: true
         },
         ['newItem']: {
 			handler: function () {
@@ -458,15 +454,7 @@ export default defineComponent({
                 this.newItem.total_pay = this.newItem.hour_pay * this.newItem.total_hours
             }
         },
-        goChangePage(payload) {
-            const paginationPayload = payload
-            const firstItem = this.timesheets[0]
-            const latestItem = this.timesheets[this.timesheets.length - 1]
-            if ( payload.pageDirection == 'previous' ) {
-                paginationPayload.page_last = firstItem ? firstItem.id : null
-            } else {
-                paginationPayload.page_last = latestItem ? latestItem.id : null
-            }
+        goChangePage(paginationPayload) {
             this.loadTimesheets( this.outline.id, paginationPayload)
         },
         goCreateNewGroup() {
@@ -477,24 +465,25 @@ export default defineComponent({
                 }
             })
         },
-        goCreateTimesheet() {
-            const store = timesheetStore()
-            this.outlines.forEach( (outline) => {
-                // Set is_selected to false for all other items
-                if ( outline.is_selected == true ) {
+        async goCreateTimesheet() {
+            if ( this.newItem.hour_pay ) {
+                if ( this.newItem.shift_date && this.newItem.start_time && this.newItem.end_time && this.newItem.hour_pay ) {
+                    this.error = null
+                    this.isLoading = true
+                    const store = timesheetStore()
                     const payload = this.newItem
-                    payload.outline_id = outline.id
-                    store.create(payload)
+                    payload.outline_id = this.outline.id
+                    await store.create(payload)
+
                     // Reset
-                    // this.newItem = {
-        			// 	name: '',
-        			// 	description: '',
-        			// 	user: '',
-        			// 	total: null,
-        			// 	date: new Date().toISOString().slice(0, 10)
-        			// }
+                    this.newItem.shift_date = null
+                    this.isLoading = false
+                } else {
+                    this.error = 'All fields are required'
                 }
-            })
+            } else {
+                this.error = 'The hourly pay has not been set, set it up or ask your manager.'
+            }
         },
         goManageGroup() {
             if ( this.outline ) {
@@ -519,25 +508,25 @@ export default defineComponent({
         },
         loadOutlines() {
             const store = outlineStore()
-            store.list()
+            store.list('timesheets')
 
             // Initialconfiguration for new item
             if (this.outline && this.outline.timesheet_hour_pay) {
                 this.newItem.hour_pay = this.outline.timesheet_hour_pay
             }
         },
-        onNavGroupClicked(group) {
+        onNavGroupClicked(outline) {
             const store = outlineStore()
-            this.visibleOutlines.forEach( (item) => {
+            this.outlines.forEach( (item) => {
                 // Set is_selected to false for all other items
-                if ( item !== group ) {
+                if ( item !== outline ) {
                     item.is_selected = false
                 }
                 // Load timesheets for selected items
                 else {
                     item.is_selected = true
                     store.outline = item
-                    this.loadTimesheets(group.id) // Load outline timesheets
+                    this.loadTimesheets(outline.id) // Load outline timesheets
                 }
             })
         }

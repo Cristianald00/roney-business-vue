@@ -25,6 +25,7 @@
 				:disabled="false"
 				placeholder="-"
 				:value="currentPerPage"
+				@onValueChanged="currentPerPage = $event"
 			/>
 		</div>
 	</div>
@@ -94,7 +95,6 @@ export default {
 	},
 	methods: {
 		onClickPreviousPage() {
-			console.log('222');
 			const payload = {
 				pageDirection: 'previous',
 				page: this.pagination.current_page > 1 ? this.pagination.current_page - 1 : 1,
@@ -123,7 +123,6 @@ export default {
 	},
 	watch: {
 		pageQty: function () {
-			console.log('PER PAGE: ', this.pageQty)
 			this.currentPerPage = this.pageQty
 		},
 		currentPerPage: function (val) {

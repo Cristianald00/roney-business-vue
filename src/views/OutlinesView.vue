@@ -288,6 +288,7 @@ export default defineComponent({
             const outline = this.newItem
             outline.color = this.newItem.color.id
             outline.assignee_id = this.newItem.assignee_id.id
+            outline.module_type = this.moduleType
             store.create(outline)
         },
         async goRemoveParent(id) {

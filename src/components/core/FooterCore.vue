@@ -37,5 +37,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .footer-container {
+    display: block;
+    min-height: 300px;
+    text-align: center;
+    .footer-body {
+        display: block;
+        padding-top: 200px;
+    }
 }
 </style>

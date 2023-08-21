@@ -102,4 +102,9 @@ html, body {
     display: inline-block;
     margin-right: 20px;
 }
+.error-message {
+    font: normal normal normal 13px/26px Montserrat;
+    font-size: 13px;
+    color: #e83239;
+}
 </style>

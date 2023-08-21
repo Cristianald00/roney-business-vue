@@ -308,16 +308,7 @@ export default defineComponent({
             }
             return color;
         },
-        goChangePage(payload) {
-            console.log('clicked');
-            const paginationPayload = payload
-            const firstItem = this.expenses[0]
-            const latestItem = this.expenses[this.expenses.length - 1]
-            if ( payload.pageDirection == 'previous' ) {
-                paginationPayload.page_last = firstItem ? firstItem.id : null
-            } else {
-                paginationPayload.page_last = latestItem ? latestItem.id : null
-            }
+        goChangePage(paginationPayload) {
             this.loadExpenses( this.outline.id, paginationPayload)
         },
         goCreateNewGroup() {
@@ -325,24 +316,19 @@ export default defineComponent({
         },
         goCreateExpense() {
             const store = expenseStore()
-            this.outlines.forEach( (outline) => {
-                // Set is_selected to false for all other items
-                if ( outline.is_selected == true ) {
-                    const payload = this.newItem
-                    payload.user_id = this.newItem.user.id
-                    payload.user_name = this.newItem.user.name
-                    payload.outline_id = outline.id
-                    store.create(payload)
-                    // Reset
-                    this.newItem = {
-        				name: '',
-        				description: '',
-        				user: '',
-        				total: null,
-        				date: new Date().toISOString().slice(0, 10)
-        			}
-                }
-            })
+            const payload = this.newItem
+            payload.user_id = this.newItem.user.id
+            payload.user_name = this.newItem.user.name
+            payload.outline_id = this.outline.id
+            store.create(payload)
+            // Reset
+            this.newItem = {
+                name: '',
+                description: '',
+                user: '',
+                total: null,
+                date: new Date().toISOString().slice(0, 10)
+            }
         },
         goManageGroup() {
             if ( this.outline ) {
@@ -362,7 +348,7 @@ export default defineComponent({
         },
         loadOutlines() {
             const store = outlineStore()
-            store.list()
+            store.list('expenses')
         },
         onNavGroupClicked(group) {
             const store = outlineStore()

@@ -46,8 +46,23 @@ export default {
 		sortTable(header) {
 			// Sorting code goes here
 		},
-		onPageChange(pagePayload) {
-			// Do on page change .. maybe filters?
-		},
+		onPageChange(payload) {
+            const paginationPayload = {
+                'page': payload.page,
+                'per_page': payload.per_page.id ?? payload.per_page
+            }
+
+            // Determine first or last item
+            const firstItem = this.timesheets[0]
+            const latestItem = this.timesheets[this.timesheets.length - 1]
+            if ( payload.pageDirection == 'previous' ) {
+                paginationPayload.page_last = firstItem ? firstItem.id : null
+            } else {
+                paginationPayload.page_last = latestItem ? latestItem.id : null
+            }
+
+			// Continue page change
+			this.goChangePage(paginationPayload)
+		}
 	}
 }
