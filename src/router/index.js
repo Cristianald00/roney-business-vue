@@ -6,9 +6,20 @@ import LoginView from '../views/LoginView.vue'
 import ExpensesView from '../views/ExpensesView.vue'
 import OutlinesView from '../views/OutlinesView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import TimesheetsView from '../views/TimesheetsView.vue'
 import OrganizationsView from '../views/OrganizationsView.vue'
 
 const routes = [
+    // ................. INTERNAL .................
+    {
+        path: '/',
+        name: '',
+        component: HomeView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
     {
         path: '/about',
         name: 'about',
@@ -54,6 +65,8 @@ const routes = [
             requiresAuth: true
         }
     },
+
+    // OUTLINES
     {
         path: '/outlines',
         name: 'outlines',
@@ -64,12 +77,40 @@ const routes = [
         }
     },
     {
+        path: '/outlines/:action',
+        name: 'outlines.action',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/outlines/:action/:item_id/',
+        name: 'outlines.edit',
+        component: OutlinesView,
+        meta: {
+            allowsPublicAccess: false,
+            requiresAuth: true
+        }
+    },
+
+    {
         path: '/register',
         name: 'register',
         component: RegisterView,
         meta: {
             allowsPublicAccess: true,
             requiresAuth: false
+        }
+    },
+    {
+        path: '/timesheets',
+        name: 'timesheets',
+        component: TimesheetsView,
+        meta: {
+            allowsPublicAccess: true,
+            requiresAuth: true
         }
     }
 ];

@@ -29,18 +29,23 @@ export const outlineStore = defineStore({
         /**
         * List outlines
         */
-        async list() {
-            const outlineData = await apiOutlineList()
+        async list(moduleType = null) {
+            const outlineData = await apiOutlineList(moduleType)
             let outlines = outlineData.outlines
             let outline = null
 
             if (outlines) {
+                const firstOutline = outlines[0] // In case non selected, make this default
                 outlines.forEach( (item) => {
-                    // Set is_selected putline as main outline state
+                    // Set is_selected outline as main outline state
                     if ( item.is_selected == true ) {
                         outline = item
                     }
                 })
+                if (!outline && firstOutline) {
+                    firstOutline.is_selected = true
+                    outline = firstOutline
+                }
             } else {
                 outlines = []
             }
@@ -53,7 +58,7 @@ export const outlineStore = defineStore({
         },
 
         /**
-        * Create outlines
+        * Update outlines
         */
         async update(id, payload) {
             const outlineData = await apiOutlineUpdate(id, payload)
@@ -121,10 +126,14 @@ function apiOutlineShow(id) {
     });
 }
 
-function apiOutlineList() {
+function apiOutlineList(moduleType = null) {
     const page = 1
+    const params = {
+        page,
+        moduleType, // Include moduleType as a query parameter
+    }
     return axios.get('/api/outlines', {
-        page
+        params: params,
     })
     .then( (response) => {
         if (response.status === 200) {

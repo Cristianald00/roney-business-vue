@@ -42,6 +42,33 @@ export const organizationStore = defineStore({
         },
 
         /**
+        * Update outline
+        */
+        async update(id, payload) {
+            const organizationData = await apiOrganizationUpdate(id, payload)
+            let organizations = this.organizations
+            let organization = organizationData.organization
+
+            // Update outlines
+            if ( organizations ) {
+                organizations.forEach( (item) => {
+                    // Set is_selected organization as main orgnanization state
+                    if ( item.id == organization.id ) {
+                        organization = item
+                    }
+                })
+            } else {
+                organizations = []
+            }
+
+            // Update states
+            this.$patch({
+                organization: organization,
+                organizations: organizations
+            })
+        },
+
+        /**
         * Create organizations
         */
         async create(payload) {
@@ -92,6 +119,26 @@ export const organizationStore = defineStore({
             this.$patch({
                 organizationUsers: organizationUsers
             })
+        },
+
+        /**
+        * Add user to organization
+        */
+        async manageOrgInvitiation(accepted = false, orgId, userId) {
+            const organizationData = await apiManageOrgInvitation(accepted, orgId, userId)
+            const organization = organizationData.organization ?? null
+
+            // Update user with new current org if accepted inbitation
+            const theUserStore = userStore()
+            if (organization) {
+                theUserStore.user.current_organization = organization.id
+
+                // Update states
+                this.$patch({
+                    organization: organization
+                })
+            }
+            theUserStore.user.organizations_invitations = null
         },
 
         /**
@@ -153,6 +200,18 @@ function apiOrganizationList() {
     });
 }
 
+function apiOrganizationUpdate(id, payload) {
+    return axios.put('/api/organizations/' + id, payload)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error updating organization');
+    });
+}
+
 function apiOrganizationCreate(payload) {
     return axios.post('/api/organizations', payload)
     .then( (response) => {
@@ -180,7 +239,7 @@ function apiOrganizationMakeCurrent(id) {
 // ORGANIZATION USERS apis
 
 function apiListOrganizationUsers(organization_id) {
-    return axios.get('/api/organizationUsers/' + organization_id)
+    return axios.get('/api/organizationUser/' + organization_id)
     .then( (response) => {
         if (response.status === 200) {
             return response.data.data
@@ -191,8 +250,23 @@ function apiListOrganizationUsers(organization_id) {
     });
 }
 
+function apiManageOrgInvitation(accepted, orgId, userId) {
+    return axios.put('/api/organizationUser/' + orgId + '/user/' + userId, {
+        accept: accepted
+    })
+    .then( (response) => {
+        console.log('response: ', response)
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error creating team');
+    });
+}
+
 function apiOrganizationAddUser(orgId, email) {
-    return axios.post('/api/organizationUsers/' + orgId, {
+    return axios.post('/api/organizationUser/' + orgId, {
         email: email
     })
     .then( (response) => {
@@ -206,7 +280,7 @@ function apiOrganizationAddUser(orgId, email) {
 }
 
 function apiOrganizationRemoveUser(orgId, userId) {
-    return axios.delete('/api/organizationUsers/' + orgId + '/user/' + userId)
+    return axios.delete('/api/organizationUser/' + orgId + '/user/' + userId)
     .then( (response) => {
         if (response.status === 200) {
             return response.data.data

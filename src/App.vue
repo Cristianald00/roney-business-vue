@@ -92,4 +92,19 @@ html, body {
 	margin: 0px;
     box-sizing: border-box;
 }
+
+.row-block {
+    display: block;
+    margin-bottom: 20px;
+}
+
+.column-block {
+    display: inline-block;
+    margin-right: 20px;
+}
+.error-message {
+    font: normal normal normal 13px/26px Montserrat;
+    font-size: 13px;
+    color: #e83239;
+}
 </style>

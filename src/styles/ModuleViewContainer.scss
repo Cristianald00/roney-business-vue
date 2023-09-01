@@ -35,6 +35,14 @@
         }
 
 		.module-group-details {
+			.module-group-details-header {
+				display: inline-flex;
+				width: 100%;
+				justify-content: space-between;
+				h1 {
+					display: inline-block;
+				}
+			}
 		    .module-group-details-item {
 		        display: block;
 		        padding: 8px 12px;

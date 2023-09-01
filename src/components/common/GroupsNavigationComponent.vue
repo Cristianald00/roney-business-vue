@@ -13,6 +13,7 @@
 			{{ group.name }}
 		</button>
 		<button
+			v-if="(role <= 2)"
 			type="button"
 			name="group-new-btn"
 			class="group-item"
@@ -30,6 +31,11 @@ export default {
 		groups: {
 			required: true,
 			type: Array
+		},
+		role: {
+			default: false,
+			required: true,
+			type: Boolean
 		}
 	},
 	data() {

@@ -11,8 +11,10 @@ import piniaPluginPersistedState from "pinia-plugin-persistedstate"
 
 // Global Components
 import InputComponent from './components/common/InputComponent.vue';
+import LabelComponent from './components/common/LabelComponent.vue';
 import IconButtonComponent from './components/common/IconButtonComponent.vue';
 import DatePickerComponent from './components/common/DatePickerComponent.vue';
+import TimePickerComponent from './components/common/TimePickerComponent.vue';
 import SubmitButtonComponent from './components/common/SubmitButtonComponent.vue';
 import DropdownAutoloadComponent from './components/common/DropdownAutoloadComponent.vue';
 
@@ -34,8 +36,10 @@ pinia.use(piniaPluginPersistedState)
 
 // Include Global Components
 app.component('InputComponent', InputComponent);
+app.component('LabelComponent', LabelComponent);
 app.component('IconButtonComponent', IconButtonComponent);
 app.component('DatePickerComponent', DatePickerComponent);
+app.component('TimePickerComponent', TimePickerComponent);
 app.component('SubmitButtonComponent', SubmitButtonComponent);
 app.component('DropdownAutoloadComponent', DropdownAutoloadComponent);
 

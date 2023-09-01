@@ -1,7 +1,7 @@
 <template>
     <div class="footer-container">
         <footer class="footer-body">
-            &copy; Awesome Company
+            All rights reserved, 2023 - Roney Technologies Inc.
         </footer>
     </div>
 </template>
@@ -37,5 +37,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .footer-container {
+    display: block;
+    min-height: 300px;
+    text-align: center;
+    .footer-body {
+        display: block;
+        padding-top: 200px;
+    }
 }
 </style>

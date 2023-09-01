@@ -49,14 +49,60 @@
                 />
             </div>
 
-            <!-- SECTION: Edit Item -->
+            <!-- SECTION: Organization Details -->
             <div v-else="view == 'edit'" class="module-group-details">
                 <div class="" v-if="organization">
-                    <h1>{{ organization.name }} <span style="font-size: 13px;">current</span></h1>
+                    <h1>{{ organization.name }}
+                        <span style="font-size: 13px;">current</span>
+                        &nbsp;
+                        <font-awesome-icon
+                            v-if="role <= 2"
+                            style="font-size: 16px; cursor: pointer;"
+                            @click="isDisplayEditOrg = true"
+                            icon="fa-solid fa-pen"
+                        />
+                    </h1>
                     <p>{{ organization.description }}</p>
+
+                    <!-- SECTION: Edit Organization details -->
+                    <div v-if="isDisplayEditOrg" class="">
+                        <br>
+                        <div class="row-block">
+                            <LabelComponent
+            					title="Name"
+                                customClass="default"
+            				/><br>
+                            <InputComponent
+            					id="team-name-input"
+            					name="team-name-input"
+            					placeholder="Team Name"
+                                customClass="medium"
+                                :value="organization.name"
+                                @input="organization.name = $event.target.value"
+            				/>
+                        </div>
+                        <div class="row-block">
+                            <div class="column-block">
+                                <SubmitButtonComponent
+                                    :title="'SAVE'"
+                                    customClass="default"
+                                    @onAction="goEditOrganization"
+                                />
+                            </div>
+                            <div class="column-block">
+                                <SubmitButtonComponent
+                                    :title="'CANCEL'"
+                                    customClass="default gray-submit"
+                                    @onAction="isDisplayEditOrg = false"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <br><br>
-                <div class="">
+
+                <!-- SECTION: User details -->
+                <div class="" v-if="role <= 2">
                     <h3>Users</h3>
                     <br>
                     <div class="">
@@ -88,7 +134,7 @@
             </div>
 
             <!-- SECTION: List items -->
-            <br><br><br>
+            <br><br><br><br>
             <div class="module-group-list">
                 <h3>Teams</h3>
                 <div
@@ -116,14 +162,16 @@ import { defineComponent, ref } from 'vue'
 import { userStore } from '../stores/user'
 import { organizationStore } from '../stores/organization'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
+import AuthenticationMixin from '@/mixins/authentication-mixin'
 
 export default defineComponent({
     name: 'OrganizationsView',
-    mixins: [ModuleListingMixin],
+    mixins: [AuthenticationMixin, ModuleListingMixin],
     components: {
     },
     data() {
         return {
+            isDisplayEditOrg: false,
             newItem: {
                 name: null,
                 date: null,
@@ -144,6 +192,9 @@ export default defineComponent({
         organizations() {
 			return organizationStore().organizations
 		},
+        role() {
+            return userStore().role ?? 4
+        }
     },
     watch: {
     },
@@ -164,9 +215,17 @@ export default defineComponent({
             }
             this.view = 'edit'
         },
+        async goEditOrganization() {
+            const store = organizationStore()
+            await store.update(this.organization.id, this.organization)
+            await store.show(this.organization.id)
+            this.isDisplayEditOrg = false
+        },
         async goMakeCurrent(id) {
             const store = organizationStore()
             await store.makeCurrent(id)
+
+            this.calculateSessionRole()
         },
         goRemoveUser(userId) {
             const store = organizationStore()
