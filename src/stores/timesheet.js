@@ -15,8 +15,8 @@ export const timesheetStore = defineStore({
         /**
         * List timesheets
         */
-        async list(outlineId, pagination) {
-            const timesheetData = await apiTimesheetList(outlineId, pagination)
+        async list(outlineId, pagination, filters = null) {
+            const timesheetData = await apiTimesheetList(outlineId, pagination, filters)
             const timesheets = timesheetData.timesheets
 
             // Update Pagination Store
@@ -68,10 +68,11 @@ export const timesheetStore = defineStore({
 * Api Requests
 */
 
-function apiTimesheetList(outlineId, pagination = null) {
+function apiTimesheetList(outlineId, pagination = null, filters = null) {
     return axios.get('/api/timesheets', {
         params: {
             pagination,
+            filters,
             outlineId
         }
     })

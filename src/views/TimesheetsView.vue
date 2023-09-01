@@ -32,6 +32,22 @@
     				customClass=""
                     @onAction="isDisplayCreateForm = true"
     			/>
+                <IconButtonComponent
+                    v-if="!isDisplayCreateForm"
+    				icon="fa-solid fa-filter"
+                    title="Filters"
+                    :selected="false"
+    				customClass=""
+                    @onAction="isDisplayFilters = true"
+    			/>
+                <IconButtonComponent
+                    v-if="!isDisplayCreateForm"
+    				icon="fa-solid fa-rectangle-list"
+                    title="Summary"
+                    :selected="false"
+    				customClass=""
+                    @onAction="goOpenModal"
+    			/>
             </div>
 
             <!-- SECTION: Create item -->
@@ -161,6 +177,54 @@
                 />
             </div>
 
+            <!-- SECTION: Filters -->
+            <div v-if="isDisplayFilters" class="module-group-create-form">
+                <div class="column-block">
+                    <LabelComponent
+    					title="From"
+                        customClass="default"
+    				/><br>
+                    <DatePickerComponent
+                        id="item-shift-date-input"
+                        name="item-shift-date-input"
+                        placeholder="Ingresa Fecha"
+                        :value="filters.from"
+                        custom-class="medium"
+                        @input="filters.from = $event.target.value"
+                    />
+                </div>
+                <div class="column-block">
+                    <LabelComponent
+    					title="To"
+                        customClass="default"
+    				/><br>
+                    <DatePickerComponent
+                        id="item-shift-date-input"
+                        name="item-shift-date-input"
+                        placeholder="Ingresa Fecha"
+                        :value="filters.to"
+                        custom-class="medium"
+                        @input="filters.to = $event.target.value"
+                    />
+                </div>
+                <div class="column-block">
+                    <SubmitButtonComponent
+                        :title="'FILTER'"
+                        :isLoading="isLoadingFilters"
+                        customClass="default"
+                        @onAction="goFilterTimesheets"
+                    />
+                </div>
+                <div class="column-block">
+                    <SubmitButtonComponent
+                        :title="'X'"
+                        :isLoading="isLoading"
+                        customClass="small gray-submit"
+                        @onAction="goClearTimesheetFilters"
+                    />
+                </div>
+            </div>
+
             <!-- SECTION: Items List -->
             <TableComponent v-if="outlines.length > 0 && timesheets && timesheets.length > 0">
 				<template v-slot:head>
@@ -188,12 +252,13 @@
 						v-for="item in timesheets"
 						:key="item.id"
 						@click="handleRowClick(item.id)"
+						:style="item.total_hours == null || item.total_hours == 0 ? 'background: lightgray;' : ''"
 					>
 						<td>{{ item.shift_date }}</td>
 						<td style="font-weight: 500;">{{ item.week_date }}</td>
                         <td>{{ convertMilitarTimeToNormalTime(item.start_time) }}</td>
 						<td>{{ convertMilitarTimeToNormalTime(item.end_time) }}</td>
-                        <td>{{ item.total_hours }}</td>
+                        <td>{{ convertNumberToDecimals(item.total_hours) }}</td>
                         <td class="cell-type-currency">{{ convertNumberToCurrency(item.hour_pay) }}</td>
                         <td class="cell-type-currency">{{ convertNumberToCurrency(item.total_pay) }}</td>
 
@@ -255,6 +320,14 @@
             </div>
         </div>
 
+        <!-- MODALS -->
+        <TimesheetSummaryModalSection
+            v-if="isOpenModal"
+            :outline="outline"
+            :timesheets="timesheets"
+            @closeModal="isOpenModal = false"
+        />
+
     </div>
 </template>
 
@@ -268,19 +341,29 @@ import { organizationStore } from '../stores/organization'
 import GlobalHelpersMixin from '@/mixins/global-helpers-mixin'
 import ModuleListingMixin from '@/mixins/module-listing-mixin'
 import ModuleTimesheetsMixin from '@/mixins/module-timesheets-mixin'
+import TimesheetSummaryModalSection from '@/components/sections/TimesheetSummaryModalSection.vue'
 
 export default defineComponent({
     name: 'TimesheetsView',
     mixins: [GlobalHelpersMixin, ModuleListingMixin, ModuleTimesheetsMixin],
     components: {
+        TimesheetSummaryModalSection
     },
     data() {
         return {
             error: null,
+            filters: {
+                from: null,
+                to: null
+            },
             isDisplayCreateForm: false,
+            isDisplayFilters: false,
             isLoading: false,
+            isLoadingFilters: false,
+            isOpenModal: false,
             name: '',
             outlineNamesArray: [],
+            paginationPayload: null,
             users: [
                 {
                     id: 1,
@@ -353,7 +436,7 @@ export default defineComponent({
         ['newItem.shift_date']: {
             handler: function (newShiftDate) {
                 if (newShiftDate) {
-                    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
                     const dateObj = new Date(newShiftDate)
                     const dayOfWeekIndex = dateObj.getDay() // 0 (Sunday) to 6 (Saturday)
 
@@ -457,6 +540,12 @@ export default defineComponent({
         goChangePage(paginationPayload) {
             this.loadTimesheets( this.outline.id, paginationPayload)
         },
+        goClearTimesheetFilters() {
+            this.filters.from = null
+            this.filters.to = null
+            this.isDisplayFilters = false
+            this.goFilterTimesheets()
+        },
         goCreateNewGroup() {
             this.$router.push({
                 path: '/outlines/new',
@@ -464,10 +553,11 @@ export default defineComponent({
                     type: 'timesheets'
                 }
             })
+            this.isDisplayFilters = false
         },
         async goCreateTimesheet() {
             if ( this.newItem.hour_pay ) {
-                if ( this.newItem.shift_date && this.newItem.start_time && this.newItem.end_time && this.newItem.hour_pay ) {
+                if ( this.newItem.shift_date ) {
                     this.error = null
                     this.isLoading = true
                     const store = timesheetStore()
@@ -479,11 +569,29 @@ export default defineComponent({
                     this.newItem.shift_date = null
                     this.isLoading = false
                 } else {
-                    this.error = 'All fields are required'
+                    this.error = 'La fecha es mandatoria'
                 }
             } else {
                 this.error = 'The hourly pay has not been set, set it up or ask your manager.'
             }
+        },
+        async goFilterTimesheets() {
+            this.isLoadingFilters = true
+            const store = timesheetStore()
+            const paginationPayload = this.paginationPayload
+            const pagination = {
+                order_by: 'key',
+                page_qty: paginationPayload ? paginationPayload.per_page : 100,
+                page_last: paginationPayload ? paginationPayload.page_last : null,
+                page: paginationPayload ? paginationPayload.page : 1
+            }
+            const filters = {
+                date_from: this.filters ? this.filters.from : null,
+                date_to: this.filters ? this.filters.to : null
+            }
+
+            await store.list(this.outline.id, pagination, filters)
+            this.isLoadingFilters = false
         },
         goManageGroup() {
             if ( this.outline ) {
@@ -495,6 +603,9 @@ export default defineComponent({
                 })
             }
         },
+        goOpenModal() {
+            this.isOpenModal = true
+        },
         loadTimesheets(outlineId, paginationPayload = null) {
             const store = timesheetStore()
             const pagination = {
@@ -503,11 +614,11 @@ export default defineComponent({
                 page_last: paginationPayload ? paginationPayload.page_last : null,
                 page: paginationPayload ? paginationPayload.page : 1
             }
+            this.paginationPayload = paginationPayload
 
             store.list(outlineId, pagination)
         },
         loadOutlines() {
-            console.log('11111')
             const store = outlineStore()
             store.list('timesheets')
 
@@ -538,6 +649,7 @@ export default defineComponent({
     },
     mounted() {
         this.loadOutlines()
+        this.newItem.total_pay = 0
     }
 })
 </script>
