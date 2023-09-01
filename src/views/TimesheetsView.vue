@@ -461,7 +461,7 @@ export default defineComponent({
             this.$router.push({
                 path: '/outlines/new',
                 query: {
-                    type: 'timesheet'
+                    type: 'timesheets'
                 }
             })
         },
@@ -507,6 +507,7 @@ export default defineComponent({
             store.list(outlineId, pagination)
         },
         loadOutlines() {
+            console.log('11111')
             const store = outlineStore()
             store.list('timesheets')
 

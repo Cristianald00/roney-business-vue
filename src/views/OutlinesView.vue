@@ -22,7 +22,7 @@
                         @input="newItem.name = $event.target.value"
     				/>
                 </div>
-                <div class="column-block" v-if="moduleType == 'timesheet'">
+                <div class="column-block" v-if="moduleType == 'timesheets'">
                     <LabelComponent
     					title="Employee"
                         customClass="default"
@@ -284,10 +284,12 @@ export default defineComponent({
             await store.show(outline.id)
         },
         goCreateGroup() {
+            console.log('moduleType: ', this.moduleType)
+            console.log('item: ', this.newItem)
             const store = outlineStore()
             const outline = this.newItem
-            outline.color = this.newItem.color.id
-            outline.assignee_id = this.newItem.assignee_id.id
+            outline.color = this.newItem.color
+            outline.assignee_id = this.newItem.assignee_id ? this.newItem.assignee_id.id : null
             outline.module_type = this.moduleType
             store.create(outline)
         },
@@ -325,20 +327,22 @@ export default defineComponent({
             }
         },
         async loadOutlines(outlineId = null) {
-            const currentOutlineId = outlineId ?? this.outline.id
-            const store = outlineStore()
-            await store.list()
+            if ( outlineId || this.outline ) {
+                const currentOutlineId = outlineId ?? this.outline.id
+                const store = outlineStore()
+                await store.list()
 
-            // Refresh parents
-            let parents = []
-            this.outlines.forEach( (item, i) => {
-                if ( item.id !== currentOutlineId ) {
-                    item.is_selected = false
-                } else {
-                    item.is_selected = true
-                    store.outline = item
-                }
-            })
+                // Refresh parents
+                let parents = []
+                this.outlines.forEach( (item, i) => {
+                    if ( item.id !== currentOutlineId ) {
+                        item.is_selected = false
+                    } else {
+                        item.is_selected = true
+                        store.outline = item
+                    }
+                })
+            }
         },
         async save() {
             const store = outlineStore()
