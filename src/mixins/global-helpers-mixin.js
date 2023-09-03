@@ -53,9 +53,19 @@ export default {
         },
         convertDateFormat(dateString) {
             if (dateString) {
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
                 const date = new Date(dateString);
-                return date.toLocaleDateString('es-ES', options);
+
+                const weekdays = [
+                    'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
+                ];
+
+                const day = date.getUTCDate();
+                const month = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(date);
+                const year = date.getUTCFullYear();
+                const weekday = weekdays[date.getUTCDay()];
+
+                return `${weekday}, ${day} de ${month} de ${year}`;
             } else {
                 return '';
             }
