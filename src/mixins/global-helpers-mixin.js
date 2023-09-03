@@ -15,7 +15,6 @@ export default {
                 theNumber = parseFloat(theNumber)
             }
             if (theNumber) {
-                console.log("NUMBERL : ", theNumber)
                 return theNumber.toFixed(2)
             }
         },
@@ -52,23 +51,28 @@ export default {
             }
         },
         convertDateFormat(dateString) {
-            if (dateString) {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const date = new Date(dateString);
+            const inputDate = dateString;
+            let formattedDate = null
+            const monthNames = [
+                'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+            ];
+            const dayNames = [
+                'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
+            ];
 
-                const weekdays = [
-                    'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
-                ];
+            try {
+                const dateObj = new Date(inputDate);
+                const dayOfWeek = dayNames[dateObj.getUTCDay()];
+                const dayOfMonth = dateObj.getUTCDate();
+                const month = monthNames[dateObj.getUTCMonth()];
+                const year = dateObj.getUTCFullYear();
 
-                const day = date.getUTCDate();
-                const month = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(date);
-                const year = date.getUTCFullYear();
-                const weekday = weekdays[date.getUTCDay()];
-
-                return `${weekday}, ${day} de ${month} de ${year}`;
-            } else {
-                return '';
+                formattedDate = `${dayOfWeek}, ${dayOfMonth} de ${month} de ${year}`;
+            } catch (error) {
+                formattedDate = 'Invalid date format. Please use YYYY-MM-DD.';
             }
+            return formattedDate
         }
     }
 }

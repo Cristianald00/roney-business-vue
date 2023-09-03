@@ -172,6 +172,10 @@ export default {
             this.initialSetUp()
         },
         totalDeduction() {
+            // In case user delets all, make sure default is 0
+            if ( !this.totalDeduction && this.totalDeduction != 0 ) {
+                this.totalDeduction = 0
+            }
             this.calculateTotals()
         }
     },
