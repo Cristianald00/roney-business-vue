@@ -21,10 +21,14 @@
             </div>
 
             <div class="modal-table">
-                <div class="modal-table-title" style="padding: 20px 0 30px; text-align: right;">
+                <div class="modal-table-title" style="padding: 20px 0 30px; text-align: right;" v-if="dateFrom || dateTo">
                     <span style="font-weight: bold;">Periodo de pago &nbsp;&nbsp;&nbsp;</span>
-                    <span>29-Jun-23 &nbsp;&nbsp;&nbsp;hasta &nbsp;&nbsp;&nbsp;21-Jul-23</span>
+                    <span>{{ dateFrom }} &nbsp;&nbsp;&nbsp;hasta &nbsp;&nbsp;&nbsp;{{ dateTo }}</span>
                     <button id="print-button" @click="printContent">Print</button>
+                </div>
+                <div class="modal-table-title" style="padding: 20px 0 30px; text-align: right;" v-else>
+                    <span style="font-weight: bold;">Periodo de pago &nbsp;&nbsp;&nbsp;</span>
+                    <span>Todas las fechas, ningún rango seleccionado.</span>
                 </div>
 
                 <table v-if="timesheets && timesheets.length > 0">
@@ -140,6 +144,14 @@ export default {
     props: {
         customClass: {
             default: 'default',
+            type: String
+        },
+        dateFrom: {
+            default: '',
+            type: String
+        },
+        dateTo: {
+            default: '',
             type: String
         },
         outline: Object,

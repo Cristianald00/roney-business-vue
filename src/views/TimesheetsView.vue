@@ -324,6 +324,8 @@
         <TimesheetSummaryModalSection
             v-if="isOpenModal"
             :outline="outline"
+            :dateFrom="filters.from"
+            :dateTo="filters.to"
             :timesheets="timesheets"
             @closeModal="isOpenModal = false"
         />
