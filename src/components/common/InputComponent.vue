@@ -188,6 +188,12 @@ export default {
 		color: var(--colorLetterBlack);
 	}
 
+	.tiny {
+		width: 55px;
+	}
+	.smaller {
+		width: 75px;
+	}
 	.small {
 		width: 110px;
 	}
@@ -222,6 +228,14 @@ export default {
 	.pass-default {
 		top: 5px;
 		right: 18%;
+	}
+
+	.no-styles {
+		height: 40px;
+		border: none;
+		border-radius: unset;
+		background: transparent;
+		border-bottom: 1px solid #8f8b8b;
 	}
 }
 

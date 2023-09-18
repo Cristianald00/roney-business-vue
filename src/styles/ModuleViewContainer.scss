@@ -6,17 +6,18 @@
         width: 70%;
         vertical-align: top;
 
+		// MODULE NAV
         .module-group-options, .module-list-options {
             .icon-button-component {
                 padding: 1em;
             }
             text-align: right;
         }
-
         .module-group-options {
             margin-top: 1em;
         }
 
+		// MODULE CREATE ITEM
         .module-group-create-form {
             display: block;
             margin: 1em 0;
@@ -30,11 +31,66 @@
                 height: 10px;
             }
         }
-
         .column_sort {
         	cursor: pointer;
         }
 
+		// MODULE TABLE
+		.module-row-viewable {
+			.module-row-viewable-item {
+				display: inline-block;
+			}
+			.module-row-editable-item {
+				display: none;
+			}
+			.module-row-edit-options-container {
+				.fa-caret-down {
+					display: inline-block;
+					padding: 14px 8px;
+				}
+				.fa-caret-left {
+					display: none;
+					padding: 14px 8px;
+				}
+				.module-row-edit-options {
+					display: none;
+				}
+			}
+		}
+		.module-row-editable {
+			position: relative;
+			td {
+				vertical-align: top;
+			}
+			.module-row-viewable-item {
+				display: none;
+			}
+			.module-row-editable-item {
+				display: inline-block;
+			}
+			.module-row-edit-options-container {
+				padding-bottom: 80px;
+				.fa-caret-down {
+					display: none;
+					padding: 14px 8px;
+				}
+				.fa-caret-left {
+					display: inline-block;
+					padding: 14px 8px;
+				}
+				.module-row-edit-options {
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					display: inline-block;
+					width: 90%;
+					padding: 10px 10px 20px;
+					text-align: left;
+				}
+			}
+		}
+
+		// MODULE RIGHT SIDE DETAILS BAR
 		.module-group-details {
 			.module-group-details-header {
 				display: inline-flex;

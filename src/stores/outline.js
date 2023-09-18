@@ -104,8 +104,9 @@ export const outlineStore = defineStore({
                 outlines: outlines
             })
 
-            // Redirect back to Expenses
-            router.push('/expenses')
+            // Redirect back to Created Group
+            const moduleType = outline.module_type ?? 'expenses'
+            router.push('/' + moduleType)
         },
     },
 })

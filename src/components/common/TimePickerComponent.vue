@@ -167,6 +167,14 @@ export default {
 		width: 560px;
 		height: 36px;
 	}
+
+	.no-styles {
+		height: 40px;
+		border: none;
+		border-radius: unset;
+		background: transparent;
+		border-bottom: 1px solid #8f8b8b;
+	}
 }
 
 .dark-style {
