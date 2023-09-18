@@ -252,15 +252,117 @@
 						v-for="item in timesheets"
 						:key="item.id"
 						@click="handleRowClick(item.id)"
+                        :class="{
+                            'module-row-viewable': (isEditRowIndex != item.id),
+                            'module-row-editable': (isEditRowIndex == item.id)
+                        }"
 						:style="item.total_hours == null || item.total_hours == 0 ? 'background: lightgray;' : ''"
 					>
-						<td>{{ item.shift_date }}</td>
-						<td style="font-weight: 500;">{{ item.week_date }}</td>
-                        <td>{{ convertMilitarTimeToNormalTime(item.start_time) }}</td>
-						<td>{{ convertMilitarTimeToNormalTime(item.end_time) }}</td>
-                        <td>{{ convertNumberToDecimals(item.total_hours) }}</td>
-                        <td class="cell-type-currency">{{ convertNumberToCurrency(item.hour_pay) }}</td>
-                        <td class="cell-type-currency">{{ convertNumberToCurrency(item.total_pay) }}</td>
+						<td>
+                            <span class="module-row-viewable-item">
+                                {{ item.shift_date }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <DatePickerComponent
+                                    :id="'item-shift-date-input-' + item.id"
+                                    :name="'item-shift-date-input-' + item.id"
+                                    placeholder="Ingresa Fecha"
+                                    :value="newItem.shift_date"
+                                    custom-class="medium no-styles"
+                                    @input="newItem.shift_date = $event.target.value"
+                                />
+                            </span>
+                        </td>
+						<td style="font-weight: 500;">
+                            <span class="module-row-viewable-item">
+                                {{ item.week_date }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <InputComponent
+                                    :id="'item-week-date-input-' + item.id"
+                                    :name="'item-week-date-input-' + item.id"
+                                    placeholder="Ingresa Día de la Semana"
+                                    customClass="tiny no-styles"
+                                    :value="newItem.week_date"
+                                    @input="newItem.week_date = $event.target.value"
+                                />
+                            </span>
+                        </td>
+                        <td>
+                            <span class="module-row-viewable-item">
+                                {{ convertMilitarTimeToNormalTime(item.start_time) }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <TimePickerComponent
+                                    :id="'item-start-time-input-' + item.id"
+                                    :name="'item-start-time-input-' + item.id"
+                                    placeholder="Hora de Inicio"
+                                    :value="newItem.start_time"
+                                    custom-class="small no-styles"
+                                    @input="newItem.start_time = $event.target.value"
+                                />
+                            </span>
+                        </td>
+						<td>
+                            <span class="module-row-viewable-item">
+                                {{ convertMilitarTimeToNormalTime(item.end_time) }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <TimePickerComponent
+                                    :id="'item-end-time-input-' + item.id"
+                                    :name="'item-end-time-input-' + item.id"
+                                    placeholder="Hora de Inicio"
+                                    :value="newItem.end_time"
+                                    custom-class="small no-styles"
+                                    @input="newItem.end_time = $event.target.value"
+                                />
+                            </span>
+                        </td>
+                        <td>
+                            <span class="module-row-viewable-item">
+                                {{ convertNumberToDecimals(item.total_hours) }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <InputComponent
+                                    :id="'item-qty-hours-input-' + item.id"
+                                    :name="'item-qty-hours-input-' + item.id"
+                                    placeholder="Horas de trabajo"
+                                    customClass="tiny no-styles"
+                                    :value="newItem.total_hours"
+                                    @input="newItem.total_hours = $event.target.value"
+                                />
+                            </span>
+                        </td>
+                        <td class="cell-type-currency">
+                            <span class="module-row-viewable-item">
+                                {{ convertNumberToCurrency(item.hour_pay) }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <InputComponent
+                                    :id="'item-hour-pay-input-' + item.id"
+                                    :name="'item-hour-pay-input-' + item.id"
+                                    placeholder="Pago Total"
+                                    customClass="tiny no-styles"
+                                    :value="newItem.hour_pay"
+                                    @input="newItem.hour_pay = $event.target.value"
+                                />
+                            </span>
+                        </td>
+                        <td class="cell-type-currency">
+                            <span class="module-row-viewable-item">
+                                {{ convertNumberToCurrency(item.total_pay) }}
+                            </span>
+                            <span class="module-row-editable-item">
+                                <InputComponent
+                                    :id="'item-total-pay-input-' + item.id"
+                                    :name="'item-total-pay-input-' + item.id"
+                                    placeholder="Pago Total"
+                                    customClass="small no-styles"
+                                    :value="newItem.total_pay"
+                                    @input="newItem.total_pay = $event.target.value"
+                                />
+                            </span>
+                        </td>
 
                         <td class="group-item-colors-td">
                             <span
@@ -269,7 +371,42 @@
                         </span>&nbsp;
                             {{ ( item.child_outline_id ? getChildOutlineName(item.child_outline_id) : '' ) }}
                         </td>
-                        <td class="cell-type-menu"><font-awesome-icon icon="fa-solid fa-caret-down" /></td>
+                        <td
+                            class="cell-type-menu module-row-edit-options-container"
+                        >
+                            <font-awesome-icon icon="fa-solid fa-caret-down" @click="goMakeEditableRow(item)" />
+                            <font-awesome-icon icon="fa-solid fa-caret-left" @click="goMakeEditableRow(item)" />
+                            <div class="module-row-edit-options">
+                                <span v-if="error" style="display: block;" class="error-message">{{ editError }}</span>
+                                <div class="column-block">
+                                    <SubmitButtonComponent
+                                        :title="'GUARDAR'"
+                                        :isLoading="isEditLoading"
+                                        customClass="default"
+                                        @onAction="goUpdateTimesheet(item)"
+                                    />
+                                </div>
+                                <div class="column-block">
+                                    <SubmitButtonComponent
+                                        :title="'CANCELAR'"
+                                        customClass="default gray-submit"
+                                        @onAction="goMakeEditableRow(item)"
+                                    />
+                                </div>
+                                <div class="column-block">
+                                    <!-- PENDING -->
+                                    <IconButtonComponent
+                                        v-if="false"
+                                        icon="fa-solid fa-trash"
+                                        title="Eliminar"
+                                        :selected="false"
+                                        customClass=""
+                                        @onAction="isDisplayCreateForm = true"
+                                    />
+                                </div>
+                            </div>
+                        </td>
+
 					</tr>
 				</template>
 				<template v-slot:footer-content>
@@ -353,11 +490,14 @@ export default defineComponent({
     },
     data() {
         return {
+            editError: null,
             error: null,
             filters: {
                 from: null,
                 to: null
             },
+            isEditLoading: false,
+            isEditRowIndex: null,
             isDisplayCreateForm: false,
             isDisplayFilters: false,
             isLoading: false,
@@ -595,6 +735,16 @@ export default defineComponent({
             await store.list(this.outline.id, pagination, filters)
             this.isLoadingFilters = false
         },
+        goMakeEditableRow(item) {
+            if ( this.isEditRowIndex != item.id ) {
+                this.isDisplayCreateForm = false
+                this.newItem = { ...item }
+                this.isEditRowIndex = item.id
+            } else {
+                this.isEditRowIndex = null
+                this.isEditRowIndex = this.newItem
+            }
+        },
         goManageGroup() {
             if ( this.outline ) {
                 this.$router.push({
@@ -607,6 +757,35 @@ export default defineComponent({
         },
         goOpenModal() {
             this.isOpenModal = true
+        },
+        async goUpdateTimesheet(item) {
+            if ( this.newItem.hour_pay ) {
+                if ( this.newItem.shift_date ) {
+                    this.editError = null
+                    this.isEditLoading = true
+                    const store = timesheetStore()
+                    const payload = this.newItem
+                    payload.outline_id = this.outline.id
+                    await store.update(payload)
+                    // item = this.newItem ? ...?
+
+                    // Reset
+                    this.newItem.shift_date = null
+                    this.isEditLoading = false
+                } else {
+                    this.editError = 'La fecha es mandatoria'
+                }
+            } else {
+                this.editError = 'The hourly pay has not been set, set it up or ask your manager.'
+            }
+
+            if ( this.isEditRowIndex != item.id ) {
+                this.newItem = { ...item }
+                this.isEditRowIndex = item.id
+            } else {
+                this.isEditRowIndex = null
+                this.isEditRowIndex = this.newItem
+            }
         },
         loadTimesheets(outlineId, paginationPayload = null) {
             const store = timesheetStore()

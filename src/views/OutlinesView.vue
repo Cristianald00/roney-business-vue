@@ -284,8 +284,6 @@ export default defineComponent({
             await store.show(outline.id)
         },
         goCreateGroup() {
-            console.log('moduleType: ', this.moduleType)
-            console.log('item: ', this.newItem)
             const store = outlineStore()
             const outline = this.newItem
             outline.color = this.newItem.color

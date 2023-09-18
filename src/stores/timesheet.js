@@ -32,6 +32,32 @@ export const timesheetStore = defineStore({
                 timesheets: timesheets
             })
         },
+
+        /**
+        * Update timesheet
+        */
+        async update(payload) {
+            const timesheetData = await apiTimesheetUpdate(payload)
+
+            // Update Outline Store
+            const theOutlineStore = outlineStore()
+            theOutlineStore.outline = timesheetData['outline']
+            const outlines = theOutlineStore.outlines
+
+            // Replace outline object with matching ID
+            const timesheetOutline = timesheetData['outline']
+            const updatedOutlines = outlines.map(outline => {
+                if (outline.id == timesheetOutline.id) {
+                    timesheetOutline.is_selected = true
+                    return timesheetOutline
+                }
+                return outline
+            })
+            theOutlineStore.outlines = updatedOutlines
+
+            // The timesheets list is automatically being refreshed
+        },
+
         /**
         * Create timesheet
         */
@@ -86,6 +112,18 @@ function apiTimesheetList(outlineId, pagination = null, filters = null) {
     });
 }
 
+function apiTimesheetUpdate(payload) {
+    return axios.put('/api/timesheets/' + payload.id , payload)
+    .then( (response) => {
+        if (response.status === 200) {
+            return response.data.data
+        }
+    })
+    .catch((error) => {
+        throw new Error('Error updating timesheet');
+    });
+}
+
 function apiTimesheetCreate(payload) {
     return axios.post('/api/timesheets', payload)
     .then( (response) => {
@@ -94,6 +132,6 @@ function apiTimesheetCreate(payload) {
         }
     })
     .catch((error) => {
-        throw new Error('Error registering');
+        throw new Error('Error creating timesheet');
     });
 }
